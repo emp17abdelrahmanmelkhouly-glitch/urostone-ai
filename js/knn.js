@@ -29,11 +29,13 @@ export function calculatePatientSimilarity(queryPatient, historicalPatient) {
   const W_LOC = 3.2;        // Anatomical level
   const W_HU = 1.8;         // Stone density & composition
   const W_HYDRO = 1.5;      // Degree of obstruction
+  const W_AGE = 1.2;        // Patient age
+  const W_SEX = 0.9;        // Biological sex
   const W_MET = 1.2;        // Alpha-blocker medical therapy
   const W_DURATION = 1.0;   // Pre-treatment colic days
   const W_PAIN = 0.8;       // Pain VAS score
 
-  const totalWeight = W_SIZE + W_LOC + W_HU + W_HYDRO + W_MET + W_DURATION + W_PAIN;
+  const totalWeight = W_SIZE + W_LOC + W_HU + W_HYDRO + W_AGE + W_SEX + W_MET + W_DURATION + W_PAIN;
 
   // 1. Size Difference (normalized over 12mm clinical range)
   const sizeDiff = Math.abs(queryPatient.stoneSizeMm - historicalPatient.stoneSizeMm);
@@ -53,14 +55,23 @@ export function calculatePatientSimilarity(queryPatient, historicalPatient) {
   const hydroH = HYDRONEPHROSIS_ORDINALS[historicalPatient.hydronephrosis] || 1;
   const normHydroDiff = Math.abs(hydroQ - hydroH) / 3.0;
 
-  // 5. MET match (0 if identical, 1 if mismatched)
+  // 5. Demographics Differences (Age & Sex)
+  const ageQ = queryPatient.age !== undefined ? queryPatient.age : 45;
+  const ageH = historicalPatient.age !== undefined ? historicalPatient.age : 45;
+  const normAgeDiff = Math.min(Math.abs(ageQ - ageH) / 45.0, 1.0);
+
+  const sexQ = (queryPatient.sex || "M").toUpperCase();
+  const sexH = (historicalPatient.sex || "M").toUpperCase();
+  const normSexDiff = sexQ === sexH ? 0.0 : 1.0;
+
+  // 6. MET match (0 if identical, 1 if mismatched)
   const normMetDiff = queryPatient.metPrescribed === historicalPatient.metPrescribed ? 0.0 : 1.0;
 
-  // 6. Symptom Duration Difference
+  // 7. Symptom Duration Difference
   const durDiff = Math.abs(queryPatient.durationDays - historicalPatient.durationDays);
   const normDurationDiff = Math.min(durDiff / 15.0, 1.0);
 
-  // 7. Pain VAS Difference
+  // 8. Pain VAS Difference
   const painDiff = Math.abs(queryPatient.painVas - historicalPatient.painVas);
   const normPainDiff = painDiff / 10.0;
 
@@ -70,6 +81,8 @@ export function calculatePatientSimilarity(queryPatient, historicalPatient) {
     W_LOC * Math.pow(normLocDiff, 2) +
     W_HU * Math.pow(normHuDiff, 2) +
     W_HYDRO * Math.pow(normHydroDiff, 2) +
+    W_AGE * Math.pow(normAgeDiff, 2) +
+    W_SEX * Math.pow(normSexDiff, 2) +
     W_MET * Math.pow(normMetDiff, 2) +
     W_DURATION * Math.pow(normDurationDiff, 2) +
     W_PAIN * Math.pow(normPainDiff, 2);

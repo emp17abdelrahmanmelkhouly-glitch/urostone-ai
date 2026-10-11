@@ -17,6 +17,8 @@ import {
 const state = {
   activeTab: "tabPredictor",
   currentPatient: {
+    age: 45,
+    sex: "M",
     stoneSizeMm: 4.5,
     location: "uvj",
     huValue: 750,
@@ -44,6 +46,17 @@ const elements = {
   tabContents: document.querySelectorAll(".tab-content"),
   themeToggleBtn: document.getElementById("themeToggleBtn"),
   btnQuickReportHeader: document.getElementById("btnQuickReportHeader"),
+
+  // Demographics
+  inputPatientAge: document.getElementById("inputPatientAge"),
+  inputPatientAgeText: document.getElementById("inputPatientAgeText"),
+  lblPatientAge: document.getElementById("lblPatientAge"),
+  genderSelector: document.getElementById("genderSelector"),
+  lblPatientGender: document.getElementById("lblPatientGender"),
+  btnStepAgeMinus: document.getElementById("btnStepAgeMinus"),
+  btnStepAgePlus: document.getElementById("btnStepAgePlus"),
+  btnGenderMale: document.getElementById("btnGenderMale"),
+  btnGenderFemale: document.getElementById("btnGenderFemale"),
 
   // Intake Inputs
   inputStoneSize: document.getElementById("inputStoneSize"),
@@ -190,6 +203,77 @@ function bindEvents() {
 
   elements.themeToggleBtn.addEventListener("click", toggleTheme);
   elements.btnQuickReportHeader.addEventListener("click", () => switchTab("tabReport"));
+
+  // Patient Age (Slider & Typeable Text)
+  if (elements.inputPatientAge) {
+    elements.inputPatientAge.addEventListener("input", (e) => {
+      state.currentPatient.age = parseInt(e.target.value, 10);
+      if (elements.inputPatientAgeText && document.activeElement !== elements.inputPatientAgeText) {
+        elements.inputPatientAgeText.value = state.currentPatient.age;
+      }
+      renderAll();
+    });
+  }
+
+  if (elements.inputPatientAgeText) {
+    const handleAgeTextInput = (val) => {
+      const parsed = parseInt(val, 10);
+      if (!isNaN(parsed) && parsed >= 10 && parsed <= 120) {
+        state.currentPatient.age = parsed;
+        if (elements.inputPatientAge) {
+          elements.inputPatientAge.value = Math.min(90, Math.max(18, parsed));
+        }
+        renderAll();
+      }
+    };
+    elements.inputPatientAgeText.addEventListener("input", (e) => handleAgeTextInput(e.target.value));
+    elements.inputPatientAgeText.addEventListener("change", (e) => {
+      handleAgeTextInput(e.target.value);
+      if (elements.inputPatientAgeText) elements.inputPatientAgeText.value = state.currentPatient.age;
+    });
+    elements.inputPatientAgeText.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") elements.inputPatientAgeText.blur();
+    });
+  }
+
+  if (elements.btnStepAgeMinus) {
+    elements.btnStepAgeMinus.addEventListener("click", () => {
+      state.currentPatient.age = Math.max(18, (state.currentPatient.age || 45) - 5);
+      if (elements.inputPatientAge) elements.inputPatientAge.value = state.currentPatient.age;
+      if (elements.inputPatientAgeText) elements.inputPatientAgeText.value = state.currentPatient.age;
+      renderAll();
+    });
+  }
+  if (elements.btnStepAgePlus) {
+    elements.btnStepAgePlus.addEventListener("click", () => {
+      state.currentPatient.age = Math.min(90, (state.currentPatient.age || 45) + 5);
+      if (elements.inputPatientAge) elements.inputPatientAge.value = state.currentPatient.age;
+      if (elements.inputPatientAgeText) elements.inputPatientAgeText.value = state.currentPatient.age;
+      renderAll();
+    });
+  }
+
+  document.querySelectorAll(".quick-chip[data-age]").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const age = parseInt(chip.getAttribute("data-age"), 10);
+      state.currentPatient.age = age;
+      if (elements.inputPatientAge) elements.inputPatientAge.value = age;
+      if (elements.inputPatientAgeText) elements.inputPatientAgeText.value = age;
+      renderAll();
+    });
+  });
+
+  if (elements.genderSelector) {
+    elements.genderSelector.querySelectorAll(".gender-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const gender = btn.getAttribute("data-gender");
+        if (gender) {
+          state.currentPatient.sex = gender;
+          renderAll();
+        }
+      });
+    });
+  }
 
   // Stone Size (Slider & Typeable Text)
   elements.inputStoneSize.addEventListener("input", (e) => {
@@ -537,6 +621,15 @@ function switchTab(tabId) {
 function applyPatientPreset(preset) {
   Object.assign(state.currentPatient, preset);
 
+  // Sync Demographics
+  if (preset.age !== undefined && elements.inputPatientAge) elements.inputPatientAge.value = preset.age;
+  if (preset.age !== undefined && elements.inputPatientAgeText) elements.inputPatientAgeText.value = preset.age;
+  if (preset.sex && elements.genderSelector) {
+    elements.genderSelector.querySelectorAll(".gender-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.getAttribute("data-gender") === preset.sex);
+    });
+  }
+
   // Sync Input Controls
   elements.inputStoneSize.value = preset.stoneSizeMm;
   elements.inputHuValue.value = preset.huValue;
@@ -624,6 +717,31 @@ function renderAll() {
 // --- Render Intake Displays ---
 function renderIntakeDisplays() {
   const p = state.currentPatient;
+
+  // Age & Gender Demographics
+  if (elements.lblPatientAge) {
+    elements.lblPatientAge.textContent = `${p.age || 45} yrs`;
+  }
+  if (elements.inputPatientAge && document.activeElement !== elements.inputPatientAge) {
+    elements.inputPatientAge.value = p.age || 45;
+  }
+  if (elements.inputPatientAgeText && document.activeElement !== elements.inputPatientAgeText) {
+    elements.inputPatientAgeText.value = p.age || 45;
+  }
+  document.querySelectorAll(".quick-chip[data-age]").forEach(chip => {
+    const chipVal = parseInt(chip.getAttribute("data-age"), 10);
+    chip.classList.toggle("active", Math.abs(chipVal - (p.age || 45)) < 4);
+  });
+
+  const isFemale = (p.sex || "M").toUpperCase() === "F";
+  if (elements.lblPatientGender) {
+    elements.lblPatientGender.textContent = isFemale ? "Female (F)" : "Male (M)";
+  }
+  if (elements.genderSelector) {
+    elements.genderSelector.querySelectorAll(".gender-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.getAttribute("data-gender") === (isFemale ? "F" : "M"));
+    });
+  }
 
   // Stone Size
   if (elements.lblStoneSize) {

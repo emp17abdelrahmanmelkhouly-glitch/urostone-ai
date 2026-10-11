@@ -43,7 +43,8 @@ In response to clinical ergonomics feedback, visual clutter and noisy HUD scanli
 - **EAU Guideline Mandate Card**: Prominent centerpiece displaying the authoritative EAU Section citation, Level of Evidence, Recommendation Strength, and step-by-step action plan.
 - **Minimalist Probability Gauge**: Clean circular arc displaying spontaneous passage percentage and tight **95% Confidence Interval** badges (`95% CI: 78% – 88%`).
 - **EAU Guidelines Reference Modal**: Accessible with one click (`EAU Guidelines Reference`) in the top navigation, presenting all guideline evidence tables, natural history rates, and dosage recommendations.
-- **Renal Function & Inflammatory Markers**: Integrated inputs for **Serum Creatinine (sCr)** and **Total Leukocyte Count (TLC)** affecting passage probability, acute kidney injury warning indicators, and EMR note generation.
+- **Patient Demographics (Age & Biological Sex)**: Integrated input controls for **Patient Age** (slider 18–90y, direct typeable input, ±5y steppers, quick chips: 28y, 45y, 62y, 75y) and **Biological Sex** (Male ♂ / Female ♀ toggle buttons). Demographics directly inform baseline physiological references, passage odds, and nearest-neighbor matching.
+- **Renal Function & Inflammatory Markers**: Integrated inputs for **Serum Creatinine (sCr)** (with sex-stratified normal ranges: Female >1.0 mg/dL borderline vs Male >1.2 mg/dL) and **Total Leukocyte Count (TLC)** affecting passage probability, acute kidney injury warning indicators, and EMR note generation.
 
 ---
 

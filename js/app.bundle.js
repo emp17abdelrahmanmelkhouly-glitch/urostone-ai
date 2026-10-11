@@ -69,6 +69,8 @@
   // is the foundational clinical standard and evidence base for every decision made in this engine.
   function calculatePassageProbability(patientData) {
     const {
+      age = 45,
+      sex = "M",
       stoneSizeMm = 4.5,
       location = "uvj",
       huValue = 750,
@@ -95,6 +97,28 @@
     // --- Log-odds Nomogram Computation ---
     let logOdds = 0.0;
     const featureImpacts = [];
+
+    // 0. Age & Biological Sex Factors
+    const effectiveAge = typeof age === "number" ? age : 45;
+    const effectiveSex = (sex || "M").toUpperCase();
+
+    if (effectiveAge <= 35) {
+      logOdds += 0.15;
+      featureImpacts.push({ feature: `Young Adult (${effectiveAge}y)`, impact: "+4%", type: "positive", detail: "Favorable ureteral elasticity & smooth muscle compliance" });
+    } else if (effectiveAge > 65) {
+      logOdds -= 0.25;
+      featureImpacts.push({ feature: `Elderly Patient (${effectiveAge}y)`, impact: "-7%", type: "negative", detail: "Reduced ureteral compliance and potential pelvic floor resistance" });
+    } else {
+      featureImpacts.push({ feature: `Adult Demographics (${effectiveAge}y)`, impact: "0%", type: "neutral", detail: "Standard physiological ureteral compliance" });
+    }
+
+    if (effectiveSex === "F") {
+      logOdds += 0.08;
+      featureImpacts.push({ feature: "Female Anatomy", impact: "+2%", type: "positive", detail: "Slightly shorter ureteral path and wider bony pelvis" });
+    } else {
+      logOdds -= 0.08;
+      featureImpacts.push({ feature: "Male Anatomy", impact: "-2%", type: "neutral", detail: "Longer ureteral trajectory and potential prostatic resistance" });
+    }
 
     // 1. Stone Size Factor (EAU Guidelines Meta-Analysis)
     if (stoneSizeMm <= 3.0) {
@@ -405,13 +429,15 @@
     const W_LOC = 3.5;
     const W_HU = 1.8;
     const W_HYDRO = 1.5;
+    const W_AGE = 1.2;
+    const W_SEX = 0.9;
     const W_CREAT = 1.3;
     const W_TLC = 1.0;
     const W_MET = 1.2;
     const W_DURATION = 1.0;
     const W_PAIN = 0.8;
 
-    const totalWeight = W_SIZE + W_LOC + W_HU + W_HYDRO + W_CREAT + W_TLC + W_MET + W_DURATION + W_PAIN;
+    const totalWeight = W_SIZE + W_LOC + W_HU + W_HYDRO + W_AGE + W_SEX + W_CREAT + W_TLC + W_MET + W_DURATION + W_PAIN;
 
     const sizeDiff = Math.abs(queryPatient.stoneSizeMm - historicalPatient.stoneSizeMm);
     const normSizeDiff = Math.min(sizeDiff / 10.0, 1.0);
@@ -426,6 +452,14 @@
     const hydroQ = HYDRONEPHROSIS_ORDINALS[queryPatient.hydronephrosis] || 1;
     const hydroH = HYDRONEPHROSIS_ORDINALS[historicalPatient.hydronephrosis] || 1;
     const normHydroDiff = Math.abs(hydroQ - hydroH) / 3.0;
+
+    const ageQ = queryPatient.age !== undefined ? queryPatient.age : 45;
+    const ageH = historicalPatient.age !== undefined ? historicalPatient.age : 45;
+    const normAgeDiff = Math.min(Math.abs(ageQ - ageH) / 45.0, 1.0);
+
+    const sexQ = (queryPatient.sex || "M").toUpperCase();
+    const sexH = (historicalPatient.sex || "M").toUpperCase();
+    const normSexDiff = sexQ === sexH ? 0.0 : 1.0;
 
     const creatQ = queryPatient.serumCreatinine !== undefined ? queryPatient.serumCreatinine : 1.0;
     const creatH = historicalPatient.serumCreatinine !== undefined ? historicalPatient.serumCreatinine : 1.0;
@@ -446,6 +480,8 @@
       W_LOC * Math.pow(normLocDiff, 2) +
       W_HU * Math.pow(normHuDiff, 2) +
       W_HYDRO * Math.pow(normHydroDiff, 2) +
+      W_AGE * Math.pow(normAgeDiff, 2) +
+      W_SEX * Math.pow(normSexDiff, 2) +
       W_CREAT * Math.pow(normCreatDiff, 2) +
       W_TLC * Math.pow(normTlcDiff, 2) +
       W_MET * Math.pow(normMetDiff, 2) +
@@ -608,6 +644,8 @@
   const state = {
     activeTab: "tabPredictor",
     currentPatient: {
+      age: 45,
+      sex: "M",
       stoneSizeMm: 4.5,
       location: "uvj",
       huValue: 750,
@@ -635,6 +673,17 @@
     eauRefModal: document.getElementById("eauRefModal"),
     btnCloseRefModal: document.getElementById("btnCloseRefModal"),
     btnCloseRefModalBtn: document.getElementById("btnCloseRefModalBtn"),
+
+    // Patient Demographics
+    inputPatientAge: document.getElementById("inputPatientAge"),
+    inputPatientAgeText: document.getElementById("inputPatientAgeText"),
+    lblPatientAge: document.getElementById("lblPatientAge"),
+    genderSelector: document.getElementById("genderSelector"),
+    lblPatientGender: document.getElementById("lblPatientGender"),
+    btnStepAgeMinus: document.getElementById("btnStepAgeMinus"),
+    btnStepAgePlus: document.getElementById("btnStepAgePlus"),
+    btnGenderMale: document.getElementById("btnGenderMale"),
+    btnGenderFemale: document.getElementById("btnGenderFemale"),
 
     // Anatomical Schematic
     lblActiveAnatomyBadge: document.getElementById("lblActiveAnatomyBadge"),
@@ -735,6 +784,7 @@
 
     // Consultation Report
     reportDate: document.getElementById("reportDate"),
+    repDemographics: document.getElementById("repDemographics"),
     repStoneSize: document.getElementById("repStoneSize"),
     repLocation: document.getElementById("repLocation"),
     repDensity: document.getElementById("repDensity"),
@@ -846,6 +896,89 @@
         if (loc) setLocation(loc);
       });
     });
+
+    // Inputs: Patient Age (Slider & Typeable Text)
+    if (elements.inputPatientAge) {
+      elements.inputPatientAge.addEventListener("input", (e) => {
+        state.currentPatient.age = parseInt(e.target.value, 10);
+        if (elements.inputPatientAgeText && document.activeElement !== elements.inputPatientAgeText) {
+          elements.inputPatientAgeText.value = state.currentPatient.age;
+        }
+        renderAll();
+      });
+    }
+
+    if (elements.inputPatientAgeText) {
+      const handleAgeTextInput = (val) => {
+        const parsed = parseInt(val, 10);
+        if (!isNaN(parsed) && parsed >= 10 && parsed <= 120) {
+          state.currentPatient.age = parsed;
+          if (elements.inputPatientAge) {
+            elements.inputPatientAge.value = Math.min(90, Math.max(18, parsed));
+          }
+          renderAll();
+        }
+      };
+
+      elements.inputPatientAgeText.addEventListener("input", (e) => {
+        handleAgeTextInput(e.target.value);
+      });
+
+      elements.inputPatientAgeText.addEventListener("change", (e) => {
+        handleAgeTextInput(e.target.value);
+        if (elements.inputPatientAgeText) {
+          elements.inputPatientAgeText.value = state.currentPatient.age;
+        }
+      });
+
+      elements.inputPatientAgeText.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          elements.inputPatientAgeText.blur();
+        }
+      });
+    }
+
+    // Touch Steppers for Age (±5 years)
+    if (elements.btnStepAgeMinus) {
+      elements.btnStepAgeMinus.addEventListener("click", () => {
+        state.currentPatient.age = Math.max(18, (state.currentPatient.age || 45) - 5);
+        if (elements.inputPatientAge) elements.inputPatientAge.value = state.currentPatient.age;
+        if (elements.inputPatientAgeText) elements.inputPatientAgeText.value = state.currentPatient.age;
+        renderAll();
+      });
+    }
+    if (elements.btnStepAgePlus) {
+      elements.btnStepAgePlus.addEventListener("click", () => {
+        state.currentPatient.age = Math.min(90, (state.currentPatient.age || 45) + 5);
+        if (elements.inputPatientAge) elements.inputPatientAge.value = state.currentPatient.age;
+        if (elements.inputPatientAgeText) elements.inputPatientAgeText.value = state.currentPatient.age;
+        renderAll();
+      });
+    }
+
+    // Quick Age Chips
+    document.querySelectorAll(".quick-chip[data-age]").forEach(chip => {
+      chip.addEventListener("click", () => {
+        const age = parseInt(chip.getAttribute("data-age"), 10);
+        state.currentPatient.age = age;
+        if (elements.inputPatientAge) elements.inputPatientAge.value = age;
+        if (elements.inputPatientAgeText) elements.inputPatientAgeText.value = age;
+        renderAll();
+      });
+    });
+
+    // Gender / Biological Sex Selector Buttons
+    if (elements.genderSelector) {
+      elements.genderSelector.querySelectorAll(".gender-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const gender = btn.getAttribute("data-gender");
+          if (gender) {
+            state.currentPatient.sex = gender;
+            renderAll();
+          }
+        });
+      });
+    }
 
     // Inputs: Stone Caliber (Slider & Typeable Text)
     elements.inputStoneSize.addEventListener("input", (e) => {
@@ -981,6 +1114,8 @@
 
     elements.btnResetIntake.addEventListener("click", () => {
       applyPreset({
+        age: 45,
+        sex: "M",
         stoneSizeMm: 4.5,
         location: "uvj",
         huValue: 750,
@@ -994,28 +1129,28 @@
         serumCreatinine: 1.0,
         solitaryKidney: false
       });
-      showToast("Intake console reset to standard clinical presentation.");
+      showToast("Intake console reset to standard clinical presentation (45y M).");
     });
 
     // Clinical Presets
     elements.presetSmallUvj.addEventListener("click", () => {
-      applyPreset({ stoneSizeMm: 3.2, location: "uvj", huValue: 680, hydronephrosis: "mild", painVas: 5, durationDays: 2, metPrescribed: true, grossHematuria: false, fever: false, tlcCount: 7.2, serumCreatinine: 0.9, solitaryKidney: false });
-      showToast("Preset: Small UVJ Calculus (3.2 mm) — Favourable Observation Candidate");
+      applyPreset({ age: 38, sex: "M", stoneSizeMm: 3.2, location: "uvj", huValue: 680, hydronephrosis: "mild", painVas: 5, durationDays: 2, metPrescribed: true, grossHematuria: false, fever: false, tlcCount: 7.2, serumCreatinine: 0.9, solitaryKidney: false });
+      showToast("Preset: Small UVJ Calculus (38y M, 3.2 mm) — Favourable Observation Candidate");
     });
 
     elements.presetBorderlineDistal.addEventListener("click", () => {
-      applyPreset({ stoneSizeMm: 5.5, location: "distal", huValue: 880, hydronephrosis: "moderate", painVas: 7, durationDays: 6, metPrescribed: true, grossHematuria: true, fever: false, tlcCount: 9.8, serumCreatinine: 1.1, solitaryKidney: false });
-      showToast("Preset: Borderline Distal Calculus (5.5 mm) — MET Indicated");
+      applyPreset({ age: 52, sex: "F", stoneSizeMm: 5.5, location: "distal", huValue: 880, hydronephrosis: "moderate", painVas: 7, durationDays: 6, metPrescribed: true, grossHematuria: true, fever: false, tlcCount: 9.8, serumCreatinine: 1.1, solitaryKidney: false });
+      showToast("Preset: Borderline Distal Calculus (52y F, 5.5 mm) — MET Indicated");
     });
 
     elements.presetDenseUpper.addEventListener("click", () => {
-      applyPreset({ stoneSizeMm: 7.5, location: "proximal", huValue: 1250, hydronephrosis: "moderate", painVas: 8, durationDays: 10, metPrescribed: false, grossHematuria: true, fever: false, tlcCount: 11.2, serumCreatinine: 1.3, solitaryKidney: false });
-      showToast("Preset: Dense Proximal Calculus (7.5 mm, 1250 HU) — Surgical Indicated");
+      applyPreset({ age: 66, sex: "M", stoneSizeMm: 7.5, location: "proximal", huValue: 1250, hydronephrosis: "moderate", painVas: 8, durationDays: 10, metPrescribed: false, grossHematuria: true, fever: false, tlcCount: 11.2, serumCreatinine: 1.3, solitaryKidney: false });
+      showToast("Preset: Dense Proximal Calculus (66y M, 7.5 mm, 1250 HU) — Surgical Indicated");
     });
 
     elements.presetEmergencyPyelo.addEventListener("click", () => {
-      applyPreset({ stoneSizeMm: 8.2, location: "uvj", huValue: 1050, hydronephrosis: "severe", painVas: 9, durationDays: 7, metPrescribed: false, grossHematuria: true, fever: true, tlcCount: 18.5, serumCreatinine: 1.9, solitaryKidney: true });
-      showToast("EMERGENCY: Obstructive Pyelonephritis — Urgent JJ Stent / PCN Required");
+      applyPreset({ age: 58, sex: "F", stoneSizeMm: 8.2, location: "uvj", huValue: 1050, hydronephrosis: "severe", painVas: 9, durationDays: 7, metPrescribed: false, grossHematuria: true, fever: true, tlcCount: 18.5, serumCreatinine: 1.9, solitaryKidney: true });
+      showToast("EMERGENCY: Obstructive Pyelonephritis (58y F) — Urgent JJ Stent / PCN Required");
     });
 
     // Registry controls
@@ -1448,21 +1583,25 @@
 
   function applyPreset(p) {
     Object.assign(state.currentPatient, p);
-    elements.inputStoneSize.value = p.stoneSizeMm;
-    elements.inputHuValue.value = p.huValue;
-    elements.inputPainScore.value = p.painVas;
-    elements.inputDurationDays.value = p.durationDays;
-    elements.chkMetPrescribed.checked = p.metPrescribed;
-    elements.chkHematuria.checked = p.grossHematuria;
-    elements.chkFever.checked = p.fever;
-    elements.chkSolitaryKidney.checked = p.solitaryKidney;
+    if (elements.inputPatientAge && p.age !== undefined) elements.inputPatientAge.value = p.age;
+    if (elements.inputPatientAgeText && p.age !== undefined) elements.inputPatientAgeText.value = p.age;
+    if (elements.inputStoneSize) elements.inputStoneSize.value = p.stoneSizeMm;
+    if (elements.inputHuValue) elements.inputHuValue.value = p.huValue;
+    if (elements.inputPainScore) elements.inputPainScore.value = p.painVas;
+    if (elements.inputDurationDays) elements.inputDurationDays.value = p.durationDays;
+    if (elements.chkMetPrescribed) elements.chkMetPrescribed.checked = p.metPrescribed;
+    if (elements.chkHematuria) elements.chkHematuria.checked = p.grossHematuria;
+    if (elements.chkFever) elements.chkFever.checked = p.fever;
+    if (elements.chkSolitaryKidney) elements.chkSolitaryKidney.checked = p.solitaryKidney;
     if (elements.inputTlcCount) elements.inputTlcCount.value = (p.tlcCount || p.wbcCount || 8.0).toFixed(1);
     if (elements.inputSerumCreatinine) elements.inputSerumCreatinine.value = (p.serumCreatinine || 1.0).toFixed(2);
 
     setLocation(p.location);
-    elements.hydronephrosisSelector.querySelectorAll(".segment-btn").forEach(btn => {
-      btn.classList.toggle("active", btn.getAttribute("data-value") === p.hydronephrosis);
-    });
+    if (elements.hydronephrosisSelector) {
+      elements.hydronephrosisSelector.querySelectorAll(".segment-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.getAttribute("data-value") === p.hydronephrosis);
+      });
+    }
     renderAll();
   }
 
@@ -1529,6 +1668,35 @@
 
   function renderIntake() {
     const p = state.currentPatient;
+
+    // Patient Demographics (Age & Gender)
+    if (elements.lblPatientAge) {
+      elements.lblPatientAge.textContent = `${p.age || 45} yrs`;
+    }
+    if (elements.inputPatientAge && document.activeElement !== elements.inputPatientAge) {
+      elements.inputPatientAge.value = p.age || 45;
+    }
+    if (elements.inputPatientAgeText && document.activeElement !== elements.inputPatientAgeText) {
+      elements.inputPatientAgeText.value = p.age || 45;
+    }
+
+    // Sync active age chip
+    document.querySelectorAll(".quick-chip[data-age]").forEach(chip => {
+      const chipVal = parseInt(chip.getAttribute("data-age"), 10);
+      chip.classList.toggle("active", Math.abs(chipVal - (p.age || 45)) < 4);
+    });
+
+    // Sync gender buttons & label
+    const isFemale = (p.sex || "M").toUpperCase() === "F";
+    if (elements.lblPatientGender) {
+      elements.lblPatientGender.textContent = isFemale ? "Female (F)" : "Male (M)";
+    }
+    if (elements.genderSelector) {
+      elements.genderSelector.querySelectorAll(".gender-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.getAttribute("data-gender") === (isFemale ? "F" : "M"));
+      });
+    }
+
     if (elements.lblStoneSize) {
       elements.lblStoneSize.textContent = `${p.stoneSizeMm.toFixed(1)} mm`;
     }
@@ -1597,11 +1765,13 @@
     if (elements.lblTlcCount) elements.lblTlcCount.textContent = `${tlc.toFixed(1)} × 10³/μL`;
     if (elements.lblSerumCreatinine) elements.lblSerumCreatinine.textContent = `${sCr.toFixed(2)} mg/dL`;
     if (elements.lblCreatinineAlert) {
-      if (sCr > 1.5) {
-        elements.lblCreatinineAlert.textContent = "⚠ Elevated — AKI risk";
+      const crHigh = isFemale ? 1.3 : 1.5;
+      const crBorder = isFemale ? 1.0 : 1.2;
+      if (sCr > crHigh) {
+        elements.lblCreatinineAlert.textContent = `⚠ Elevated (> ${crHigh} mg/dL) — AKI risk`;
         elements.lblCreatinineAlert.style.color = "var(--color-danger)";
-      } else if (sCr > 1.2) {
-        elements.lblCreatinineAlert.textContent = "Borderline elevated";
+      } else if (sCr > crBorder) {
+        elements.lblCreatinineAlert.textContent = `Borderline (> ${crBorder} mg/dL)`;
         elements.lblCreatinineAlert.style.color = "var(--color-warning)";
       } else {
         elements.lblCreatinineAlert.textContent = "Normal range";
@@ -1914,6 +2084,9 @@
     const sCr = p.serumCreatinine || 1.0;
 
     elements.reportDate.textContent = new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+    if (elements.repDemographics) {
+      elements.repDemographics.textContent = `${p.age || 45} yrs • ${p.sex === "F" ? "Female" : "Male"}`;
+    }
     elements.repStoneSize.textContent = `${p.stoneSizeMm.toFixed(1)} mm (Maximum Caliber)`;
     const locMap = { uvj: "UVJ (Ureterovesical Junction)", distal: "Distal Ureter", mid: "Mid Ureter (Iliac Crossing)", proximal: "Proximal Ureter", puj: "PUJ (Pelviureteric Junction)" };
     elements.repLocation.textContent = locMap[p.location] || p.location;
@@ -1969,6 +2142,7 @@ Protocol Authority: European Association of Urology (EAU) Guidelines on Urolithi
 Registry Calibration: 500-Patient Historical Cohort Registry (100% PubMed Trial Series & EAU Calibrated)
 
 1. CLINICAL PRESENTATION & STONE PROFILE:
+- Patient Demographics: ${p.age || 45} years old | ${p.sex === "F" ? "Female (F)" : "Male (M)"}
 - Stone Maximum Caliber: ${p.stoneSizeMm.toFixed(1)} mm
 - Anatomical Location: ${p.location.toUpperCase()}
 - Non-Contrast CT Attenuation: ${p.huValue} HU (${pred.huAnalysis.category} — ${pred.huAnalysis.hardness})

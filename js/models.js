@@ -57,6 +57,8 @@ export function classifyHounsfieldUnit(hu) {
  */
 export function calculatePassageProbability(patientData) {
   const {
+    age = 45,
+    sex = "M",
     stoneSizeMm = 4.0,
     location = "distal", // "uvj", "distal", "mid", "proximal", "puj"
     huValue = 750,
@@ -77,9 +79,29 @@ export function calculatePassageProbability(patientData) {
   if (solitaryKidney && hydronephrosis !== "none") emergencyReasons.push("Solitary kidney with obstruction (Risk of anuria/acute renal failure)");
 
   // --- 2. Baseline Model Weights & Feature Attributions ---
-  // Baseline average spontaneous passage for ureteral stone in literature is ~50%
   let logOdds = 0.0;
   const featureImpacts = [];
+
+  // Age & Gender Demographics
+  const effectiveAge = typeof age === "number" ? age : 45;
+  const effectiveSex = (sex || "M").toUpperCase();
+  if (effectiveAge <= 35) {
+    logOdds += 0.15;
+    featureImpacts.push({ feature: `Young Adult (${effectiveAge}y)`, impact: "+4%", type: "positive", detail: "Favorable ureteral elasticity & smooth muscle compliance" });
+  } else if (effectiveAge > 65) {
+    logOdds -= 0.25;
+    featureImpacts.push({ feature: `Elderly Patient (${effectiveAge}y)`, impact: "-7%", type: "negative", detail: "Reduced ureteral compliance and potential pelvic floor resistance" });
+  } else {
+    featureImpacts.push({ feature: `Adult Demographics (${effectiveAge}y)`, impact: "0%", type: "neutral", detail: "Standard physiological ureteral compliance" });
+  }
+
+  if (effectiveSex === "F") {
+    logOdds += 0.08;
+    featureImpacts.push({ feature: "Female Anatomy", impact: "+2%", type: "positive", detail: "Slightly shorter ureteral path and wider bony pelvis" });
+  } else {
+    logOdds -= 0.08;
+    featureImpacts.push({ feature: "Male Anatomy", impact: "-2%", type: "neutral", detail: "Longer ureteral trajectory and potential prostatic resistance" });
+  }
 
   // (A) Stone Size Impact (The strongest single predictor)
   // EAU guidelines: <4mm ~85-90%, 4-6mm ~55-60%, 6-8mm ~30%, >8mm <15%
