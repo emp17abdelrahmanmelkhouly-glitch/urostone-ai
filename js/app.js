@@ -113,6 +113,21 @@ const elements = {
   recPlanList: document.getElementById("recPlanList"),
   attributionGrid: document.getElementById("attributionGrid"),
 
+  // Surgical Pathway & Staging Matrix
+  surgicalPathwayCard: document.getElementById("surgicalPathwayCard"),
+  pathwayStrategyBadge: document.getElementById("pathwayStrategyBadge"),
+  pathwayVerdictBanner: document.getElementById("pathwayVerdictBanner"),
+  pathwayVerdictTag: document.getElementById("pathwayVerdictTag"),
+  pathwayVerdictHeadline: document.getElementById("pathwayVerdictHeadline"),
+  pathwayVerdictSubtext: document.getElementById("pathwayVerdictSubtext"),
+  lblColDecompressBadge: document.getElementById("lblColDecompressBadge"),
+  lblColDecompressTitle: document.getElementById("lblColDecompressTitle"),
+  colDecompressBody: document.getElementById("colDecompressBody"),
+  lblColDefinitiveBadge: document.getElementById("lblColDefinitiveBadge"),
+  lblColDefinitiveTitle: document.getElementById("lblColDefinitiveTitle"),
+  colDefinitiveBody: document.getElementById("colDefinitiveBody"),
+  pathwayPearlBox: document.getElementById("pathwayPearlBox"),
+
   // Mobile Sticky Outcome Bar
   mobileStickySummary: document.getElementById("mobileStickySummary"),
   mobileProbVal: document.getElementById("mobileProbVal"),
@@ -861,6 +876,26 @@ function renderPredictionHero(pred) {
   elements.recTitle.textContent = pred.actionTitle;
   elements.recTimeText.textContent = pred.timePassageSummary;
 
+  // Render Surgical Staging & Modality Pathway Card
+  if (pred.surgicalPathway && elements.surgicalPathwayCard) {
+    const sp = pred.surgicalPathway;
+    elements.surgicalPathwayCard.classList.toggle("alert-emergency", Boolean(pred.isEmergency));
+    if (elements.pathwayStrategyBadge) {
+      elements.pathwayStrategyBadge.textContent = sp.strategyBadge;
+      elements.pathwayStrategyBadge.className = `pathway-strategy-badge ${sp.strategyBadgeClass || ""}`;
+    }
+    if (elements.pathwayVerdictTag) elements.pathwayVerdictTag.textContent = sp.verdictTag;
+    if (elements.pathwayVerdictHeadline) elements.pathwayVerdictHeadline.textContent = sp.verdictHeadline;
+    if (elements.pathwayVerdictSubtext) elements.pathwayVerdictSubtext.textContent = sp.verdictSubtext;
+    if (elements.lblColDecompressBadge) elements.lblColDecompressBadge.textContent = sp.colDecompressBadge;
+    if (elements.lblColDecompressTitle) elements.lblColDecompressTitle.textContent = sp.colDecompressTitle;
+    if (elements.colDecompressBody) elements.colDecompressBody.innerHTML = sp.colDecompressHtml;
+    if (elements.lblColDefinitiveBadge) elements.lblColDefinitiveBadge.textContent = sp.colDefinitiveBadge;
+    if (elements.lblColDefinitiveTitle) elements.lblColDefinitiveTitle.textContent = sp.colDefinitiveTitle;
+    if (elements.colDefinitiveBody) elements.colDefinitiveBody.innerHTML = sp.colDefinitiveHtml;
+    if (elements.pathwayPearlBox) elements.pathwayPearlBox.innerHTML = sp.pearlHtml;
+  }
+
   // Structured Action Plan List
   elements.recPlanList.innerHTML = pred.clinicalActionPlan
     .map(step => `
@@ -1165,9 +1200,26 @@ function renderReportView() {
   }
 
   // Management Plan Text
+  const sp = pred.surgicalPathway;
   elements.repManagementPlanText.innerHTML = `
     <p><strong>Clinical Stratification:</strong> ${pred.actionTitle}</p>
     <p><strong>Estimated Passage Timeline:</strong> ${pred.timePassageSummary}</p>
+    ${sp ? `
+      <div style="margin: 0.65rem 0; padding: 0.65rem 0.85rem; border-radius: 6px; background: rgba(15, 23, 42, 0.45); border: 1px solid var(--border-color);">
+        <div style="font-size: 0.78rem; font-weight: 700; color: ${pred.isEmergency ? 'var(--status-danger)' : 'var(--accent-sky)'}; text-transform: uppercase;">
+          SURGICAL STAGING &amp; PROCEDURAL PATHWAY: ${sp.strategyBadge}
+        </div>
+        <div style="font-size: 0.82rem; margin-top: 0.25rem;">
+          <strong>Definitive Removal from Start (URS / FURS / ESWL):</strong> ${sp.verdictHeadline}
+        </div>
+        <div style="font-size: 0.80rem; margin-top: 0.25rem; color: var(--text-muted);">
+          <strong>Upfront Drainage (DJ Stent vs PCN):</strong> ${sp.colDecompressTitle}
+        </div>
+        <div style="font-size: 0.80rem; margin-top: 0.25rem; color: var(--text-muted);">
+          <strong>Definitive Modality Selection:</strong> ${sp.colDefinitiveTitle}
+        </div>
+      </div>
+    ` : ""}
     <p style="margin-top: 0.5rem;"><strong>Recommended Clinical Protocol:</strong></p>
     <ol style="padding-left: 1.25rem; margin-top: 0.25rem;">
       ${pred.clinicalActionPlan.map(step => `<li>${step}</li>`).join("")}
@@ -1180,6 +1232,7 @@ function copyConsultationNoteToClipboard() {
   const p = state.currentPatient;
   const pred = calculatePassageProbability(p);
   const cbr = findSimilarHistoricalCases(p, state.cohort, 5);
+  const sp = pred.surgicalPathway;
 
   let aiProbText = `${pred.probabilityPercent}%`;
   let cohortText = `Among ${cbr.totalMatchesCount} most clinically proximate historical cases, ${cbr.historicalPassageRate}% passed spontaneously (avg ${cbr.avgDaysToPassage || "N/A"} days) and ${100 - cbr.historicalPassageRate}% required intervention.`;
@@ -1189,9 +1242,15 @@ function copyConsultationNoteToClipboard() {
     cohortText = `Among ${cbr.totalMatchesCount} matched emergency urosepsis cohort presentations, 100% required urgent upper urinary tract decompression (Double-J stent / PCN); 0% managed conservatively on MET.`;
   }
 
-  const note = `UROLOGY CONSULTATION & STONE PASSAGE ASSESSMENT
+  const note = `================================================================================
+AIN SHAMS UNIVERSITY HOSPITALS — FACULTY OF MEDICINE
+DEPARTMENT OF UROLOGY & ENDOUROLOGY
+UROLOGY CONSULTATION & CALCULUS PASSAGE ASSESSMENT
+================================================================================
 Date: ${new Date().toLocaleDateString()}
-Facility: Division of Urology
+Institutional Affiliation: Ain Shams University Hospitals (Department of Urology)
+Protocol Authority: European Association of Urology (EAU) Guidelines on Urolithiasis
+Registry Calibration: 500-Patient Historical Cohort Registry (100% PubMed Trial Series & EAU Calibrated)
 
 1. PATIENT FINDINGS:
 - Stone Maximum Diameter: ${p.stoneSizeMm} mm
@@ -1207,7 +1266,19 @@ Facility: Division of Urology
 - Case-Based Cohort Comparison: ${cohortText}
 - Primary Determinants: ${pred.featureImpacts.map(i => `${i.feature} (${i.impact})`).join(", ")}
 
-3. RECOMMENDATION & MANAGEMENT PLAN:
+3. SURGICAL STAGING & PROCEDURAL PATHWAY (EAU § 3.2.3 & § 3.4):
+- Strategy Classification: ${sp ? sp.strategyBadge : "Standard EAU Pathway"}
+- Definitive Removal From Start (URS / FURS / ESWL): ${sp ? sp.verdictHeadline : "See below"}
+  * Rationale: ${sp ? sp.verdictSubtext : ""}
+- Upfront Drainage Directive (DJ Stent vs Percutaneous Nephrostomy):
+  ${sp ? `${sp.colDecompressBadge} — ${sp.colDecompressTitle}` : "N/A"}
+  * Retrograde DJ Stent: Preferred in bleeding diathesis / coagulopathy (PCN carries parenchymal hemorrhage risk), distal/mid stone with bypassable wire, or lithotomy position tolerated (EAU LoE 1b).
+  * Percutaneous Nephrostomy (PCN): Preferred in severe septic shock with hemodynamic instability (rapid bedside local anesthesia without GA/lithotomy), impassable impacted stone, or gross viscous pyonephrosis (8–10Fr lumen drains thick pus effectively).
+- Definitive Clearance Modality Selection:
+  ${sp ? `${sp.colDefinitiveBadge} — ${sp.colDefinitiveTitle}` : "URS / ESWL"}
+  * EAU Directive: ${sp && sp.canDoDefinitiveFromStart ? "Primary single-stage definitive removal proceeds directly from the start (routine pre-stenting NOT indicated, LoE 1b)." : "Definitive stone removal STRICTLY DEFERRED until patient is afebrile >= 48–72h, TLC/inflammatory markers normalize, and urine is sterile. Primary URS/ESWL in active sepsis is strictly contraindicated due to pyelovenous bacteremia and septic shock risk (LoE 1b)."}
+
+4. RECOMMENDATION & MANAGEMENT PLAN:
 - Recommendation: ${pred.actionTitle}
 - Timeline: ${pred.timePassageSummary}
 - Actions:

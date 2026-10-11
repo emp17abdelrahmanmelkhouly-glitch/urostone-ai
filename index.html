@@ -638,6 +638,58 @@
               </div>
             </div>
 
+            <!-- SURGICAL STAGING & MODALITY DECISION MATRIX (DJ vs PCN vs Primary Definitive URS/FURS/ESWL) -->
+            <div class="surgical-pathway-card" id="surgicalPathwayCard">
+              <div class="pathway-card-header">
+                <div class="pathway-header-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                  </svg>
+                  <span>SURGICAL STRATEGY &amp; STAGING (EAU ALGORITHM)</span>
+                </div>
+                <span class="pathway-strategy-badge" id="pathwayStrategyBadge">Single-Stage Primary Definitive</span>
+              </div>
+
+              <!-- Main Strategy Verdict Headline -->
+              <div class="pathway-verdict-banner" id="pathwayVerdictBanner">
+                <div class="verdict-tag" id="pathwayVerdictTag">Definitive Removal from Start:</div>
+                <div class="verdict-headline" id="pathwayVerdictHeadline">YES — Primary Single-Stage Definitive Removal</div>
+                <div class="verdict-subtext" id="pathwayVerdictSubtext">Afebrile presentation allows immediate, single-stage definitive stone fragmentation without prior DJ stenting.</div>
+              </div>
+
+              <!-- Two-Column Strategy Comparator -->
+              <div class="pathway-cols-grid">
+                <!-- Column 1: Decompression / Upfront Staging -->
+                <div class="pathway-subcol" id="pathwayColDecompress">
+                  <div class="subcol-header">
+                    <span class="subcol-badge" id="lblColDecompressBadge">UPFRONT DRAINAGE</span>
+                    <h4 class="subcol-title" id="lblColDecompressTitle">DJ Stent vs Nephrostomy (PCN)</h4>
+                  </div>
+                  <div class="subcol-body" id="colDecompressBody">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+
+                <!-- Column 2: Definitive Stone Clearance Modality -->
+                <div class="pathway-subcol" id="pathwayColDefinitive">
+                  <div class="subcol-header">
+                    <span class="subcol-badge" id="lblColDefinitiveBadge">DEFINITIVE MODALITY</span>
+                    <h4 class="subcol-title" id="lblColDefinitiveTitle">Primary URS vs FURS vs ESWL</h4>
+                  </div>
+                  <div class="subcol-body" id="colDefinitiveBody">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actionable Clinical Pearl / Guideline Footnote -->
+              <div class="pathway-pearl-box" id="pathwayPearlBox">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
             <!-- Structured EAU Step-by-Step Clinical Protocol -->
             <div>
               <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.45rem;">

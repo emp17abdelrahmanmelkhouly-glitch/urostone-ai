@@ -311,6 +311,8 @@ export function calculatePassageProbability(patientData) {
     ];
   }
 
+  const surgicalPathway = determineSurgicalPathway(patientData, probabilityPercent, isEmergency);
+
   return {
     probabilityPercent,
     percentage: probabilityPercent,
@@ -326,6 +328,212 @@ export function calculatePassageProbability(patientData) {
     actionTitle,
     clinicalActionPlan,
     featureImpacts,
-    huAnalysis: classifyHounsfieldUnit(huValue)
+    huAnalysis: classifyHounsfieldUnit(huValue),
+    surgicalPathway
+  };
+}
+
+/**
+ * Determine Surgical Staging Strategy: Emergency Decompression (DJ Stent vs PCN)
+ * vs Primary Definitive Stone Removal from the Start (URS / FURS / ESWL)
+ * Aligned with EAU Guidelines § 3.2.3, § 3.4.4, § 3.4.5 (LoE 1a / 1b)
+ * @param {object} patientData 
+ * @param {number} probabilityPercent 
+ * @param {boolean} isEmergency 
+ * @returns {object} Detailed surgical pathway decision matrix
+ */
+export function determineSurgicalPathway(patientData, probabilityPercent, isEmergency) {
+  const {
+    stoneSizeMm = 4.5,
+    location = "distal",
+    huValue = 750
+  } = patientData;
+
+  if (isEmergency) {
+    const definitiveModalityChoice = (location === "distal" || location === "uvj")
+      ? "Semi-rigid Ureteroscopy (URS) + Laser"
+      : (huValue >= 1000 || stoneSizeMm > 10.0 ? "Flexible URS (FURS / RIRS) + Laser" : "Flexible URS or ESWL");
+
+    return {
+      strategyType: "two_stage",
+      strategyBadge: "TWO-STAGE MANDATE (EAU § 3.2.3)",
+      strategyBadgeClass: "badge-danger",
+      canDoDefinitiveFromStart: false,
+      definitiveStartVerdict: "STRICTLY CONTRAINDICATED FROM THE START",
+      verdictTag: "Definitive Removal from Start (URS / FURS / ESWL):",
+      verdictHeadline: "STRICTLY CONTRAINDICATED FROM START — TWO-STAGE DRAINAGE MANDATORY",
+      verdictSubtext: "Active infection / SIRS mandates urgent upper urinary tract decompression within hours. Attempting primary definitive stone fragmentation (URS / FURS / ESWL) from the start in an infected system is strictly contraindicated due to life-threatening sepsis risk.",
+      colDecompressBadge: "STAGE 1: EMERGENCY DECOMPRESSION (WITHIN HOURS)",
+      colDecompressTitle: "Retrograde DJ Stent vs Percutaneous Nephrostomy (PCN)",
+      colDecompressHtml: `
+        <div class="subcol-option-item">
+          <div class="subcol-option-name" style="color: #38bdf8;">
+            <span>⚡ Retrograde Double-J (DJ) Stent</span>
+          </div>
+          <div><strong>Preferred when:</strong> Patient has bleeding diathesis / coagulopathy (PCN has higher parenchymal hemorrhage risk), calculus located in distal or mid ureter with safety guidewire bypassable, patient tolerates lithotomy position, and routine cystoscopy setup is readily available (EAU LoE 1b).</div>
+        </div>
+        <div class="subcol-option-item" style="margin-top: 5px;">
+          <div class="subcol-option-name" style="color: #f59e0b;">
+            <span>⚡ Percutaneous Nephrostomy (PCN)</span>
+          </div>
+          <div><strong>Preferred when:</strong> Severe septic shock with hemodynamic instability (rapid bedside placement under local anesthesia in prone/flank position without GA or lithotomy), impassable impacted stone (failed retrograde wire), or gross purulent pyonephrosis (thicker 8–10Fr lumen drains viscous pus effectively).</div>
+        </div>
+      `,
+      colDefinitiveBadge: "STAGE 2: DEFINITIVE STONE CLEARANCE (DELAYED)",
+      colDefinitiveTitle: "Definitive Removal Timing: Strictly Deferred",
+      colDefinitiveHtml: `
+        <div class="subcol-option-item" style="border-color: rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.08);">
+          <div class="subcol-option-name" style="color: #f87171;">
+            <span>⛔ Why Primary URS/FURS/ESWL is Contraindicated Upfront:</span>
+          </div>
+          <div>Endoscopic irrigation in an infected obstructed system generates elevated intrapelvic pressure (>30–40 mmHg), forcing bacteria & endotoxins into the renal circulation (pyelovenous/pyelolymphatic backflow), triggering fulminant septic shock, multi-organ failure, and mortality (EAU § 3.2.3, LoE 1b).</div>
+        </div>
+        <div class="subcol-option-item" style="margin-top: 5px;">
+          <div class="subcol-option-name" style="color: #34d399;">
+            <span>✓ Safe Definitive Surgery Timing:</span>
+          </div>
+          <div>Defer definitive <strong>${definitiveModalityChoice}</strong> until patient is clinically afebrile for ≥ 48–72 hours, TLC / inflammatory markers normalize, and urine is sterile on culture (typically 1–2 weeks post-decompression). The Stage 1 DJ stent also provides passive dilation for safer Stage 2 URS.</div>
+        </div>
+      `,
+      pearlHtml: `<strong>EAU GUIDELINE MANDATE (§ 3.2.3, LoE 1b, Strong):</strong> "In infected hydronephrosis, urgent decompression of the renal collecting system is mandatory. Definitive stone removal MUST be delayed until sepsis resolves completely."`,
+      definitiveModalityChoice,
+      definitiveModalityName: definitiveModalityChoice,
+      preStentingNote: "The emergency Double-J stent placed in Stage 1 serves both as lifesaving infection drainage and as passive ureteral dilation for safer Stage 2 URS."
+    };
+  }
+
+  // Non-Emergency: Candidate for conservative observation
+  const isHighPassageCandidate = probabilityPercent >= 70 && stoneSizeMm <= 5.0;
+
+  if (isHighPassageCandidate) {
+    const backupModality = (location === "distal" || location === "uvj")
+      ? "Semi-rigid URS + Laser Lithotripsy"
+      : (huValue >= 1000 ? "Flexible URS (RIRS) + Laser" : "ESWL or Flexible URS");
+
+    return {
+      strategyType: "conservative_first",
+      strategyBadge: "CONSERVATIVE TRIAL FIRST (EAU § 3.4.1)",
+      strategyBadgeClass: "badge-success",
+      canDoDefinitiveFromStart: true,
+      definitiveStartVerdict: "CONSERVATIVE TRIAL FIRST (ELECTIVE BACKUP)",
+      verdictTag: "Definitive Removal from Start (URS / FURS / ESWL):",
+      verdictHeadline: "CONSERVATIVE TRIAL FIRST — Definitive Removal Only if Non-Passage at 4 Weeks",
+      verdictSubtext: "Patient has favorable caliber for spontaneous expulsion. Active surgical intervention and pre-stenting are not indicated during the initial 4-week surveillance ceiling.",
+      colDecompressBadge: "UPFRONT DRAINAGE STATUS",
+      colDecompressTitle: "Decompression (DJ / PCN) Not Indicated",
+      colDecompressHtml: `
+        <div class="subcol-option-item">
+          <div class="subcol-option-name" style="color: #34d399;">
+            <span>✓ No Stenting or Nephrostomy Required</span>
+          </div>
+          <div>Afebrile presentation with manageable colic: patient does not require Double-J stenting or nephrostomy. Initial management is Medical Expulsive Therapy (Tamsulosin 0.4mg daily) and oral NSAIDs (EAU LoE 1a).</div>
+        </div>
+        <div class="subcol-option-item" style="margin-top: 5px;">
+          <div class="subcol-option-name" style="color: #f59e0b;">
+            <span>⚠ Safety Window: 4 Weeks Maximum Limit</span>
+          </div>
+          <div>Repeat ultrasound / imaging at 2–3 weeks. Do not exceed 4 weeks of observation to prevent silent nephron loss or ureteral stricture.</div>
+        </div>
+      `,
+      colDefinitiveBadge: "SECONDARY BACKUP DEFINITIVE",
+      colDefinitiveTitle: "Elective Primary URS / ESWL if Trial Fails",
+      colDefinitiveHtml: `
+        <div class="subcol-option-item" style="border-color: rgba(14, 165, 233, 0.3); background: rgba(14, 165, 233, 0.08);">
+          <div class="subcol-option-name" style="color: #38bdf8;">
+            <span>🎯 Backup Procedure: ${backupModality}</span>
+          </div>
+          <div>If calculus fails to pass spontaneously by 4 weeks, proceed directly to definitive single-stage primary URS or ESWL without preliminary stenting.</div>
+        </div>
+        <div class="subcol-option-item" style="margin-top: 5px;">
+          <div class="subcol-option-name" style="color: var(--text-muted);">
+            <span>Pre-stenting Rule:</span>
+          </div>
+          <div>Routine pre-stenting prior to elective URS is NOT recommended (EAU LoE 1b); primary URS without prior stenting is safe and effective.</div>
+        </div>
+      `,
+      pearlHtml: `<strong>EAU GUIDELINE (§ 3.4.1):</strong> High spontaneous clearance caliber. Active intervention is reserved for failed conservative trial, refractory pain, or persistent obstruction at 4 weeks.`,
+      definitiveModalityChoice: backupModality,
+      definitiveModalityName: backupModality,
+      preStentingNote: "Routine pre-stenting is not indicated."
+    };
+  }
+
+  // Non-Emergency Candidates Requiring Active Removal (Borderline or Primary Surgical):
+  let definitiveModalityName = "";
+  let definitiveModalityRationale = "";
+  let definitiveModalityChoice = "";
+
+  if (["distal", "uvj"].includes(location)) {
+    definitiveModalityName = "Semi-rigid Ureteroscopy (URS) + Laser Lithotripsy";
+    definitiveModalityRationale = "EAU LoE 1a: URS achieves superior 1-session stone-free rate (>95%) for distal calculi compared to ESWL. Upfront stent placement is NOT needed.";
+    definitiveModalityChoice = "URS Preferred Over ESWL (LoE 1a)";
+  } else if (location === "mid") {
+    if (huValue < 1000 && stoneSizeMm <= 10.0) {
+      definitiveModalityName = "Semi-rigid/Flexible URS or Shock Wave Lithotripsy (ESWL)";
+      definitiveModalityRationale = "EAU LoE 1b: Equivalent primary success rates for mid-ureteral calculi <10mm and <1000 HU. Shared clinical decision based on patient preference and availability.";
+      definitiveModalityChoice = "Shared Decision (URS vs ESWL)";
+    } else {
+      definitiveModalityName = "Ureteroscopy (URS / Laser Lithotripsy)";
+      definitiveModalityRationale = "EAU LoE 1b: Dense stone (≥1000 HU) or larger caliber (>10mm) confers high shockwave resistance; endoscopic laser disintegration is preferred.";
+      definitiveModalityChoice = "URS Preferred Over ESWL";
+    }
+  } else {
+    // proximal or puj
+    if (huValue < 1000 && stoneSizeMm <= 10.0) {
+      definitiveModalityName = "Flexible URS (FURS / RIRS) or Shock Wave Lithotripsy (ESWL)";
+      definitiveModalityRationale = "EAU LoE 1b: Both ESWL and Flexible URS with laser lithotripsy are recommended first-line modalities for upper ureteral calculi <10mm with density <1000 HU.";
+      definitiveModalityChoice = "Flexible URS or ESWL (Equivalent Efficacy)";
+    } else {
+      definitiveModalityName = "Flexible URS (FURS / RIRS) + Laser Lithotripsy";
+      definitiveModalityRationale = "EAU LoE 1b: Calculus caliber >10mm or CT attenuation ≥1000 HU (dense calcium oxalate monohydrate or brushite) significantly reduces ESWL disintegration rates; flexible ureteroscopy with Holmium/Thulium laser dusting is strongly preferred.";
+      definitiveModalityChoice = "Flexible URS (FURS) Preferred";
+    }
+  }
+
+  return {
+    strategyType: "single_stage_definitive",
+    strategyBadge: "SINGLE-STAGE DEFINITIVE (EAU § 3.4.4)",
+    strategyBadgeClass: "badge-primary",
+    canDoDefinitiveFromStart: true,
+    definitiveStartVerdict: "PRIMARY DEFINITIVE REMOVAL FROM THE START (SINGLE-STAGE)",
+    verdictTag: "Definitive Removal from Start (URS / FURS / ESWL):",
+    verdictHeadline: "YES — Primary Single-Stage Definitive Removal Standard of Care",
+    verdictSubtext: "Afebrile, non-septic presentation allows immediate, single-stage definitive stone fragmentation and clearance from the start. Routine preliminary DJ stenting is NOT required.",
+    colDecompressBadge: "UPFRONT DRAINAGE & PRE-STENTING",
+    colDecompressTitle: "Is Pre-Stenting (DJ) Required Before URS/ESWL?",
+    colDecompressHtml: `
+      <div class="subcol-option-item">
+        <div class="subcol-option-name" style="color: #38bdf8;">
+          <span>✓ Routine Pre-stenting NOT Indicated (EAU LoE 1b)</span>
+        </div>
+        <div>Primary URS or ESWL should proceed directly without upfront stent placement. Routine pre-stenting adds cost and morbidity without improving primary stone-free rates.</div>
+      </div>
+      <div class="subcol-option-item" style="margin-top: 5px;">
+        <div class="subcol-option-name" style="color: var(--text-muted);">
+          <span>ℹ Passive Dilation Exception:</span>
+        </div>
+        <div>A temporary DJ stent is placed only if unexpected anatomical ureteral narrowness prevents scope / access sheath advancement during the primary attempt; URS is then completed 1–2 weeks later.</div>
+      </div>
+    `,
+    colDefinitiveBadge: "DEFINITIVE MODALITY OF CHOICE",
+    colDefinitiveTitle: `${definitiveModalityChoice}`,
+    colDefinitiveHtml: `
+      <div class="subcol-option-item" style="border-color: rgba(14, 165, 233, 0.3); background: rgba(14, 165, 233, 0.08);">
+        <div class="subcol-option-name" style="color: #38bdf8;">
+          <span>🎯 Recommended Procedure: ${definitiveModalityName}</span>
+        </div>
+        <div>${definitiveModalityRationale}</div>
+      </div>
+      <div class="subcol-option-item" style="margin-top: 5px;">
+        <div class="subcol-option-name" style="color: #34d399;">
+          <span>Post-Operative Stenting:</span>
+        </div>
+        <div>Following uncomplicated primary URS, placement of a short-term post-operative stent (Double-J or string stent for 3–7 days) is optional; stentless URS is safe in select uncomplicated non-impacted cases (EAU LoE 1b).</div>
+      </div>
+    `,
+    pearlHtml: `<strong>EAU CLINICAL PRINCIPLE (§ 3.4.4):</strong> Single-stage primary definitive stone removal achieves high stone-free rates (>90%) with minimal morbidity. Decompression is reserved for sepsis, severe unmanageable colic, or deteriorating renal function.`,
+    definitiveModalityChoice,
+    definitiveModalityName,
+    preStentingNote: "Routine pre-stenting is not recommended; primary URS proceeds directly."
   };
 }
