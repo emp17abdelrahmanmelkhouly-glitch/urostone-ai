@@ -2043,7 +2043,7 @@
     });
 
     elements.presetBorderlineDistal.addEventListener("click", () => {
-      applyPreset({ age: 52, sex: "F", stoneSizeMm: 5.5, location: "distal", huValue: 880, hydronephrosis: "moderate", painVas: 7, durationDays: 6, metPrescribed: true, grossHematuria: true, fever: false, tlcCount: 9.8, serumCreatinine: 1.1, solitaryKidney: false });
+      applyPreset({ age: 52, sex: "F", stoneSizeMm: 5.5, location: "distal", huValue: 880, hydronephrosis: "mild", painVas: 6, durationDays: 4, metPrescribed: true, grossHematuria: false, fever: false, tlcCount: 8.2, serumCreatinine: 0.85, solitaryKidney: false });
       showToast("Preset: Borderline Distal Calculus (52y F, 5.5 mm) — MET Indicated");
     });
 

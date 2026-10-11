@@ -498,15 +498,19 @@ function bindEvents() {
 
   elements.presetBorderlineDistal.addEventListener("click", () => {
     applyPatientPreset({
+      age: 52,
+      sex: "F",
       stoneSizeMm: 5.5,
       location: "distal",
       huValue: 880,
-      hydronephrosis: "moderate",
-      painVas: 7,
-      durationDays: 6,
+      hydronephrosis: "mild",
+      painVas: 6,
+      durationDays: 4,
       metPrescribed: true,
-      grossHematuria: true,
+      grossHematuria: false,
       fever: false,
+      tlcCount: 8.2,
+      serumCreatinine: 0.85,
       solitaryKidney: false
     });
     showToast("Loaded Preset: Borderline Distal Calculus (5.5mm)");
