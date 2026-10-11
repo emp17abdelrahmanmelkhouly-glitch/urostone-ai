@@ -822,23 +822,37 @@ function renderPredictionHero(pred) {
 
   // Circular Gauge Animation
   const percent = pred.probabilityPercent;
-  elements.probVal.textContent = percent;
-
-  // Circumference for r=70 is 2 * PI * 70 ≈ 439.8
   const circumference = 440;
-  const offset = circumference - (circumference * percent) / 100;
-  elements.gaugeCircle.style.strokeDashoffset = offset;
 
-  // Dynamic Color on Gauge
-  if (percent >= 70) {
-    elements.gaugeCircle.style.stroke = "var(--status-success)";
-    elements.probSummarySubtext.textContent = "High probability of spontaneous expulsion within 4 weeks.";
-  } else if (percent >= 45) {
-    elements.gaugeCircle.style.stroke = "var(--status-warning)";
-    elements.probSummarySubtext.textContent = "Borderline probability. Limited trial of MET under surveillance.";
-  } else {
+  if (pred.isEmergency) {
+    elements.probVal.textContent = "0";
+    if (elements.lblConfidenceInterval) {
+      elements.lblConfidenceInterval.textContent = "CONTRAINDICATED (EAU § 3.2.3)";
+      elements.lblConfidenceInterval.className = "confidence-interval-badge alert-contraindicated";
+    }
+    elements.gaugeCircle.style.strokeDashoffset = circumference;
     elements.gaugeCircle.style.stroke = "var(--status-danger)";
-    elements.probSummarySubtext.textContent = "Low spontaneous passage. Endourological intervention recommended.";
+    elements.probSummarySubtext.textContent = "Spontaneous passage trial strictly contraindicated. Obstructive urosepsis mandates emergency decompression within hours (EAU LoE 1b).";
+  } else {
+    elements.probVal.textContent = percent;
+    if (elements.lblConfidenceInterval) {
+      elements.lblConfidenceInterval.className = "confidence-interval-badge";
+      elements.lblConfidenceInterval.textContent = `95% CI: ${pred.ciLow || Math.max(1, percent - 5)}% – ${pred.ciHigh || Math.min(99, percent + 5)}%`;
+    }
+    const offset = circumference - (circumference * percent) / 100;
+    elements.gaugeCircle.style.strokeDashoffset = offset;
+
+    // Dynamic Color on Gauge
+    if (percent >= 70) {
+      elements.gaugeCircle.style.stroke = "var(--status-success)";
+      elements.probSummarySubtext.textContent = "High probability of spontaneous expulsion within 4 weeks.";
+    } else if (percent >= 45) {
+      elements.gaugeCircle.style.stroke = "var(--status-warning)";
+      elements.probSummarySubtext.textContent = "Borderline probability. Limited trial of MET under surveillance.";
+    } else {
+      elements.gaugeCircle.style.stroke = "var(--status-danger)";
+      elements.probSummarySubtext.textContent = "Low spontaneous passage. Endourological intervention recommended.";
+    }
   }
 
   // Recommendation Badge & Title
@@ -879,16 +893,38 @@ function renderAttributionGrid(impacts) {
 // --- Render Case-Based Reasoning Matches ---
 function renderCbrSection(cbr) {
   elements.lblCohortDbCount.textContent = `Registry: ${state.cohort.length} cases`;
-  elements.cbrPassageRate.textContent = `${cbr.historicalPassageRate}%`;
-  elements.cbrAvgDays.textContent = cbr.avgDaysToPassage !== null ? `${cbr.avgDaysToPassage} d` : "N/A";
-  elements.cbrInterventionRate.textContent = `${100 - cbr.historicalPassageRate}%`;
+
+  if (cbr.isEmergencyStratum) {
+    elements.cbrPassageRate.textContent = `${cbr.historicalPassageRate}%`;
+    elements.cbrPassageRate.style.color = "var(--status-danger)";
+    elements.cbrAvgDays.textContent = cbr.avgDaysToPassage !== null ? `${cbr.avgDaysToPassage} d` : "Contraindicated";
+    elements.cbrAvgDays.style.color = "var(--status-danger)";
+    elements.cbrInterventionRate.textContent = `${100 - cbr.historicalPassageRate}%`;
+    elements.cbrInterventionRate.style.color = "var(--status-danger)";
+  } else {
+    elements.cbrPassageRate.textContent = `${cbr.historicalPassageRate}%`;
+    elements.cbrPassageRate.style.color = "var(--status-success)";
+    elements.cbrAvgDays.textContent = cbr.avgDaysToPassage !== null ? `${cbr.avgDaysToPassage} d` : "N/A";
+    elements.cbrAvgDays.style.color = "var(--accent-sky)";
+    elements.cbrInterventionRate.textContent = `${100 - cbr.historicalPassageRate}%`;
+    elements.cbrInterventionRate.style.color = "var(--status-danger)";
+  }
 
   if (cbr.topMatches.length === 0) {
     elements.cbrMatchesContainer.innerHTML = `<div style="grid-column: 1/-1; padding: 1rem; color: var(--text-muted); text-align: center;">No matching historical cases found.</div>`;
     return;
   }
 
-  elements.cbrMatchesContainer.innerHTML = cbr.topMatches
+  let emergencyNoticeHtml = "";
+  if (cbr.isEmergencyStratum) {
+    emergencyNoticeHtml = `
+      <div class="cbr-emergency-callout">
+        <strong>CRITICAL STRATIFICATION (EAU § 3.2.3):</strong> Active fever / SIRS criteria detected. The model has automatically stratified matching against <em>historical emergency urosepsis presentations</em> requiring urgent upper tract decompression (JJ Stent / PCN). Spontaneous trial with MET is strictly contraindicated in this cohort.
+      </div>
+    `;
+  }
+
+  elements.cbrMatchesContainer.innerHTML = emergencyNoticeHtml + cbr.topMatches
     .map(pt => {
       const isPassed = pt.outcome === "passed";
       const outcomeBadge = isPassed
@@ -912,6 +948,7 @@ function renderCbrSection(cbr) {
             <span class="metric-chip">${pt.huValue} HU</span>
             <span class="metric-chip">Hydro: ${pt.hydronephrosis}</span>
             <span class="metric-chip">${pt.metPrescribed ? "MET: Yes" : "No MET"}</span>
+            ${pt.fever ? '<span class="metric-chip" style="color:var(--status-danger); border-color:rgba(239,68,68,0.4);">Fever/Sepsis</span>' : ''}
           </div>
 
           <div class="match-outcome-row">
@@ -1107,14 +1144,25 @@ function renderReportView() {
   elements.repInfection.textContent = p.fever ? "FEVER PRESENT / SIRS SUSPECTED (High Risk)" : "Afebrile, no signs of sepsis";
 
   // AI Analytics Text
-  elements.repAiAnalysisText.innerHTML = `
-    <p><strong>Predicted Spontaneous Passage Likelihood:</strong> <span style="font-size: 1.1rem; font-weight: 700; color: var(--accent-sky);">${pred.probabilityPercent}%</span></p>
-    <p><strong>Case-Based Cohort Comparison:</strong> Evaluated against <strong>${cbr.totalMatchesCount} most clinically proximate historical cases</strong> from patient registry. In this matched subgroup, <strong>${cbr.historicalPassageRate}% achieved spontaneous expulsion</strong> (mean time: <strong>${cbr.avgDaysToPassage || "N/A"} days</strong>), while <strong>${100 - cbr.historicalPassageRate}% required endourological intervention</strong> (URS / SWL).</p>
-    <p style="margin-top: 0.5rem;"><strong>Primary Clinical Determinants:</strong></p>
-    <ul style="padding-left: 1.25rem; margin-top: 0.25rem;">
-      ${pred.featureImpacts.map(i => `<li><strong>${i.feature}:</strong> ${i.impact} impact (${i.detail})</li>`).join("")}
-    </ul>
-  `;
+  if (pred.isEmergency) {
+    elements.repAiAnalysisText.innerHTML = `
+      <p><strong>Predicted Spontaneous Passage Likelihood:</strong> <span style="font-size: 1.1rem; font-weight: 700; color: var(--status-danger);">0% (CONTRAINDICATED)</span> (EAU § 3.2.3: Active infection mandates immediate upper tract decompression; conservative observation is strictly contraindicated)</p>
+      <p><strong>Case-Based Cohort Comparison (Emergency Stratum):</strong> Evaluated against <strong>${cbr.totalMatchesCount} emergency urosepsis cohort presentations</strong> from patient registry. In this matched septic subgroup, <strong>100% required emergency surgical decompression</strong> (urgent retrograde JJ stent or PCN), with <strong>0% managed conservatively on MET</strong>.</p>
+      <p style="margin-top: 0.5rem;"><strong>Primary Clinical Determinants:</strong></p>
+      <ul style="padding-left: 1.25rem; margin-top: 0.25rem;">
+        ${pred.featureImpacts.map(i => `<li><strong>${i.feature}:</strong> ${i.impact} impact (${i.detail})</li>`).join("")}
+      </ul>
+    `;
+  } else {
+    elements.repAiAnalysisText.innerHTML = `
+      <p><strong>Predicted Spontaneous Passage Likelihood:</strong> <span style="font-size: 1.1rem; font-weight: 700; color: var(--accent-sky);">${pred.probabilityPercent}%</span></p>
+      <p><strong>Case-Based Cohort Comparison:</strong> Evaluated against <strong>${cbr.totalMatchesCount} most clinically proximate historical cases</strong> from patient registry. In this matched subgroup, <strong>${cbr.historicalPassageRate}% achieved spontaneous expulsion</strong> (mean time: <strong>${cbr.avgDaysToPassage || "N/A"} days</strong>), while <strong>${100 - cbr.historicalPassageRate}% required endourological intervention</strong> (URS / SWL).</p>
+      <p style="margin-top: 0.5rem;"><strong>Primary Clinical Determinants:</strong></p>
+      <ul style="padding-left: 1.25rem; margin-top: 0.25rem;">
+        ${pred.featureImpacts.map(i => `<li><strong>${i.feature}:</strong> ${i.impact} impact (${i.detail})</li>`).join("")}
+      </ul>
+    `;
+  }
 
   // Management Plan Text
   elements.repManagementPlanText.innerHTML = `
@@ -1133,6 +1181,14 @@ function copyConsultationNoteToClipboard() {
   const pred = calculatePassageProbability(p);
   const cbr = findSimilarHistoricalCases(p, state.cohort, 5);
 
+  let aiProbText = `${pred.probabilityPercent}%`;
+  let cohortText = `Among ${cbr.totalMatchesCount} most clinically proximate historical cases, ${cbr.historicalPassageRate}% passed spontaneously (avg ${cbr.avgDaysToPassage || "N/A"} days) and ${100 - cbr.historicalPassageRate}% required intervention.`;
+
+  if (pred.isEmergency) {
+    aiProbText = `0% [CONTRAINDICATED — EAU § 3.2.3: Active infection mandates emergency decompression; observation is strictly contraindicated]`;
+    cohortText = `Among ${cbr.totalMatchesCount} matched emergency urosepsis cohort presentations, 100% required urgent upper urinary tract decompression (Double-J stent / PCN); 0% managed conservatively on MET.`;
+  }
+
   const note = `UROLOGY CONSULTATION & STONE PASSAGE ASSESSMENT
 Date: ${new Date().toLocaleDateString()}
 Facility: Division of Urology
@@ -1143,12 +1199,12 @@ Facility: Division of Urology
 - Non-Contrast CT Attenuation: ${p.huValue} HU (${pred.huAnalysis.category})
 - Hydronephrosis: ${p.hydronephrosis}
 - Colic Duration: ${p.durationDays} days (VAS Pain: ${p.painVas}/10)
-- Infection/SIRS: ${p.fever ? "POSITIVE (Fever / Systemic Signs)" : "Negative / Afebrile"}
-- Medical Expulsive Therapy (MET): ${p.metPrescribed ? "Prescribed" : "Not Prescribed"}
+- Infection/SIRS: ${p.fever ? "POSITIVE (Fever / Systemic Signs - HIGH RISK OBSTRUCTIVE SEPSIS)" : "Negative / Afebrile"}
+- Medical Expulsive Therapy (MET): ${pred.isEmergency ? "CONTRAINDICATED (Active Sepsis Mandates Drainage)" : (p.metPrescribed ? "Prescribed" : "Not Prescribed")}
 
 2. AI CLINICAL PREDICTION & COMPARATIVE COHORT:
-- Predicted Spontaneous Passage Likelihood: ${pred.probabilityPercent}%
-- Case-Based Cohort Comparison: Among ${cbr.totalMatchesCount} most clinically proximate historical cases, ${cbr.historicalPassageRate}% passed spontaneously (avg ${cbr.avgDaysToPassage || "N/A"} days) and ${100 - cbr.historicalPassageRate}% required intervention.
+- Predicted Spontaneous Passage Likelihood: ${aiProbText}
+- Case-Based Cohort Comparison: ${cohortText}
 - Primary Determinants: ${pred.featureImpacts.map(i => `${i.feature} (${i.impact})`).join(", ")}
 
 3. RECOMMENDATION & MANAGEMENT PLAN:

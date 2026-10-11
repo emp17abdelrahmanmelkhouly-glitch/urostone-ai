@@ -219,9 +219,15 @@ export function calculatePassageProbability(patientData) {
   if (probabilityPercent > 96) probabilityPercent = 96;
   if (probabilityPercent < 3) probabilityPercent = 3;
 
-  // If severe emergency flags present, spontaneous trial is contraindicated
+  // If severe emergency flags present, spontaneous trial is strictly contraindicated per EAU § 3.2.3
   if (isEmergency) {
-    probabilityPercent = Math.min(probabilityPercent, 15);
+    probabilityPercent = 0;
+    featureImpacts.unshift({
+      feature: "Fever / SIRS / Sepsis Flag",
+      impact: "CONTRAINDICATED",
+      type: "negative",
+      detail: "Active infected obstruction is an emergency requiring immediate decompression (EAU § 3.2.3). Conservative trial with MET is strictly contraindicated."
+    });
   }
 
   // --- 4. Expected Time to Passage Estimation (Days) ---
@@ -229,7 +235,11 @@ export function calculatePassageProbability(patientData) {
   let estimatedDaysMax = 7;
   let timePassageSummary = "";
 
-  if (probabilityPercent >= 75) {
+  if (isEmergency) {
+    estimatedDaysMin = null;
+    estimatedDaysMax = null;
+    timePassageSummary = "Observation contraindicated — Immediate upper tract decompression required within hours (EAU LoE 1b)";
+  } else if (probabilityPercent >= 75) {
     if (stoneSizeMm <= 3.5) {
       estimatedDaysMin = 2;
       estimatedDaysMax = 7;

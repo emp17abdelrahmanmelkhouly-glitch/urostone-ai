@@ -24,38 +24,61 @@ const HYDRONEPHROSIS_ORDINALS = {
  * @returns {number} Similarity percentage between 0 and 100
  */
 export function calculatePatientSimilarity(queryPatient, historicalPatient) {
+  // Clinical Emergency / Sepsis determination (EAU § 3.2.3)
+  const isQueryEmergency = Boolean(
+    queryPatient.fever ||
+    (queryPatient.tlcCount !== undefined && queryPatient.tlcCount >= 14.0) ||
+    (queryPatient.wbcCount !== undefined && queryPatient.wbcCount >= 14.0) ||
+    (queryPatient.solitaryKidney && queryPatient.hydronephrosis && queryPatient.hydronephrosis !== "none")
+  );
+
+  const isHistEmergency = Boolean(
+    historicalPatient.fever ||
+    (historicalPatient.tlcCount !== undefined && historicalPatient.tlcCount >= 14.0) ||
+    (historicalPatient.wbcCount !== undefined && historicalPatient.wbcCount >= 14.0) ||
+    (historicalPatient.solitaryKidney && historicalPatient.hydronephrosis && historicalPatient.hydronephrosis !== "none") ||
+    historicalPatient.interventionType === "urgent_stent_urs" ||
+    historicalPatient.interventionType === "urgent_pcn"
+  );
+
   // Feature weights (Higher weight = higher clinical relevance for stone passage)
-  const W_SIZE = 4.0;       // Stone size is primary determinant
+  const W_EMERGENCY = 14.0; // Overriding priority: Sepsis/emergency obstruction must match emergency cases
+  const W_SIZE = 4.0;       // Stone size is primary physical determinant
   const W_LOC = 3.2;        // Anatomical level
   const W_HU = 1.8;         // Stone density & composition
   const W_HYDRO = 1.5;      // Degree of obstruction
   const W_AGE = 1.2;        // Patient age
   const W_SEX = 0.9;        // Biological sex
-  const W_MET = 1.2;        // Alpha-blocker medical therapy
+  const W_CREAT = 1.6;      // Serum Creatinine / Renal impairment
+  const W_TLC = 1.4;        // Inflammatory leukocytosis
+  const W_MET = isQueryEmergency ? 0.1 : 1.2; // In sepsis, MET is clinically irrelevant
   const W_DURATION = 1.0;   // Pre-treatment colic days
   const W_PAIN = 0.8;       // Pain VAS score
 
-  const totalWeight = W_SIZE + W_LOC + W_HU + W_HYDRO + W_AGE + W_SEX + W_MET + W_DURATION + W_PAIN;
+  const totalWeight = W_EMERGENCY + W_SIZE + W_LOC + W_HU + W_HYDRO + W_AGE + W_SEX + W_CREAT + W_TLC + W_MET + W_DURATION + W_PAIN;
 
-  // 1. Size Difference (normalized over 12mm clinical range)
+  // 1. Emergency Stratum Difference
+  const normEmergencyDiff = (isQueryEmergency === isHistEmergency) ? 0.0 : 1.0;
+
+  // 2. Size Difference (normalized over 10mm clinical range)
   const sizeDiff = Math.abs(queryPatient.stoneSizeMm - historicalPatient.stoneSizeMm);
   const normSizeDiff = Math.min(sizeDiff / 10.0, 1.0);
 
-  // 2. Location Difference (ordinal difference)
+  // 3. Location Difference (ordinal difference)
   const locQ = LOCATION_ORDINALS[queryPatient.location] || 2;
   const locH = LOCATION_ORDINALS[historicalPatient.location] || 2;
   const normLocDiff = Math.abs(locQ - locH) / 4.0;
 
-  // 3. HU Difference (normalized over 1200 HU range)
+  // 4. HU Difference (normalized over 1200 HU range)
   const huDiff = Math.abs(queryPatient.huValue - historicalPatient.huValue);
   const normHuDiff = Math.min(huDiff / 1200.0, 1.0);
 
-  // 4. Hydronephrosis Difference
+  // 5. Hydronephrosis Difference
   const hydroQ = HYDRONEPHROSIS_ORDINALS[queryPatient.hydronephrosis] || 1;
   const hydroH = HYDRONEPHROSIS_ORDINALS[historicalPatient.hydronephrosis] || 1;
   const normHydroDiff = Math.abs(hydroQ - hydroH) / 3.0;
 
-  // 5. Demographics Differences (Age & Sex)
+  // 6. Demographics Differences (Age & Sex)
   const ageQ = queryPatient.age !== undefined ? queryPatient.age : 45;
   const ageH = historicalPatient.age !== undefined ? historicalPatient.age : 45;
   const normAgeDiff = Math.min(Math.abs(ageQ - ageH) / 45.0, 1.0);
@@ -64,25 +87,37 @@ export function calculatePatientSimilarity(queryPatient, historicalPatient) {
   const sexH = (historicalPatient.sex || "M").toUpperCase();
   const normSexDiff = sexQ === sexH ? 0.0 : 1.0;
 
-  // 6. MET match (0 if identical, 1 if mismatched)
+  // 7. Renal Function & Inflammatory Markers
+  const creatQ = queryPatient.serumCreatinine !== undefined ? queryPatient.serumCreatinine : 1.0;
+  const creatH = historicalPatient.serumCreatinine !== undefined ? historicalPatient.serumCreatinine : 1.0;
+  const normCreatDiff = Math.min(Math.abs(creatQ - creatH) / 2.0, 1.0);
+
+  const tlcQ = queryPatient.tlcCount || queryPatient.wbcCount || 8.0;
+  const tlcH = historicalPatient.tlcCount || historicalPatient.wbcCount || 8.0;
+  const normTlcDiff = Math.min(Math.abs(tlcQ - tlcH) / 12.0, 1.0);
+
+  // 8. MET match (0 if identical, 1 if mismatched)
   const normMetDiff = queryPatient.metPrescribed === historicalPatient.metPrescribed ? 0.0 : 1.0;
 
-  // 7. Symptom Duration Difference
+  // 9. Symptom Duration Difference
   const durDiff = Math.abs(queryPatient.durationDays - historicalPatient.durationDays);
   const normDurationDiff = Math.min(durDiff / 15.0, 1.0);
 
-  // 8. Pain VAS Difference
+  // 10. Pain VAS Difference
   const painDiff = Math.abs(queryPatient.painVas - historicalPatient.painVas);
   const normPainDiff = painDiff / 10.0;
 
   // Weighted quadratic distance
   const weightedSum =
+    W_EMERGENCY * Math.pow(normEmergencyDiff, 2) +
     W_SIZE * Math.pow(normSizeDiff, 2) +
     W_LOC * Math.pow(normLocDiff, 2) +
     W_HU * Math.pow(normHuDiff, 2) +
     W_HYDRO * Math.pow(normHydroDiff, 2) +
     W_AGE * Math.pow(normAgeDiff, 2) +
     W_SEX * Math.pow(normSexDiff, 2) +
+    W_CREAT * Math.pow(normCreatDiff, 2) +
+    W_TLC * Math.pow(normTlcDiff, 2) +
     W_MET * Math.pow(normMetDiff, 2) +
     W_DURATION * Math.pow(normDurationDiff, 2) +
     W_PAIN * Math.pow(normPainDiff, 2);
@@ -160,6 +195,13 @@ export function findSimilarHistoricalCases(queryPatient, cohortDatabase, k = 6) 
     ? Math.round((totalDaysForPassed / passedDaysCount) * 10) / 10
     : null;
 
+  const isEmergencyStratum = Boolean(
+    queryPatient.fever ||
+    (queryPatient.tlcCount !== undefined && queryPatient.tlcCount >= 14.0) ||
+    (queryPatient.wbcCount !== undefined && queryPatient.wbcCount >= 14.0) ||
+    (queryPatient.solitaryKidney && queryPatient.hydronephrosis && queryPatient.hydronephrosis !== "none")
+  );
+
   return {
     topMatches,
     historicalPassageRate,
@@ -167,6 +209,7 @@ export function findSimilarHistoricalCases(queryPatient, cohortDatabase, k = 6) 
     totalMatchesCount: topMatches.length,
     passedCount,
     interventionCount: topMatches.length - passedCount,
-    interventionBreakdown
+    interventionBreakdown,
+    isEmergencyStratum
   };
 }
