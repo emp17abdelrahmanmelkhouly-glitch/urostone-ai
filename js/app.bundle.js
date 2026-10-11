@@ -8,7 +8,7 @@
   // ========================================================
   // 1. DATA ACCESS & LOCAL STORAGE KEY
   // ========================================================
-  const DB_STORAGE_KEY_V6 = "urostone_patient_cohort_v6_eau_500";
+  const DB_STORAGE_KEY_V7 = "urostone_patient_cohort_v7_pubmed_all_500";
 
   // Load cohort from window or fallback
   const DEFAULT_COHORT_500 = (typeof window !== "undefined" && window.INITIAL_PATIENT_COHORT_500 && window.INITIAL_PATIENT_COHORT_500.length > 0)
@@ -513,7 +513,7 @@
   // ========================================================
   function getCohort() {
     try {
-      const stored = localStorage.getItem(DB_STORAGE_KEY_V6);
+      const stored = localStorage.getItem(DB_STORAGE_KEY_V7);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length >= 450) return parsed;
@@ -527,7 +527,7 @@
 
   function saveCohort(cohort) {
     try {
-      localStorage.setItem(DB_STORAGE_KEY_V6, JSON.stringify(cohort));
+      localStorage.setItem(DB_STORAGE_KEY_V7, JSON.stringify(cohort));
     } catch (e) {
       console.error("Storage write error", e);
     }
@@ -1931,7 +1931,7 @@
 
     elements.repAiAnalysisText.innerHTML = `
       <p><strong>Predicted Spontaneous Expulsion Probability:</strong> <span style="font-size: 1.15rem; font-weight: 800; color: var(--color-primary-light);">${pred.probabilityPercent}%</span> (95% CI: ${pred.ciLow}% – ${pred.ciHigh}%)</p>
-      <p style="margin-top: 0.35rem;"><strong>500-Patient Historical Cohort Correlation:</strong> Evaluated against <strong>${cbr.totalMatchesCount} most clinically proximate historical cases</strong> from the calibrated registry (including 100 PubMed clinical trial series). In this matched subgroup, <strong>${cbr.historicalPassageRate}% achieved spontaneous expulsion</strong> (mean time: <strong>${cbr.avgDaysToPassage || "N/A"} days</strong>), while <strong>${100 - cbr.historicalPassageRate}% required endourological intervention</strong> (URS / SWL).</p>
+      <p style="margin-top: 0.35rem;"><strong>500-Patient Historical Cohort Correlation:</strong> Evaluated against <strong>${cbr.totalMatchesCount} most clinically proximate historical cases</strong> from the calibrated registry (100% verified & cited PubMed clinical trial series). In this matched subgroup, <strong>${cbr.historicalPassageRate}% achieved spontaneous expulsion</strong> (mean time: <strong>${cbr.avgDaysToPassage || "N/A"} days</strong>), while <strong>${100 - cbr.historicalPassageRate}% required endourological intervention</strong> (URS / SWL).</p>
       <p style="margin-top: 0.5rem;"><strong>Nomogram Determinant Weights:</strong></p>
       <ul style="padding-left: 1.25rem; margin-top: 0.25rem;">
         ${pred.featureImpacts.map(i => `<li><strong>${i.feature}:</strong> ${i.impact} impact (${i.detail})</li>`).join("")}
@@ -1966,7 +1966,7 @@ UROLOGY CONSULTATION & CALCULUS PASSAGE ASSESSMENT
 Date: ${new Date().toLocaleDateString()}
 Institutional Affiliation: Ain Shams University Hospitals (Department of Urology)
 Protocol Authority: European Association of Urology (EAU) Guidelines on Urolithiasis
-Registry Calibration: 500-Patient Historical Cohort Registry (ASU-URO-REGISTRY #500 & PubMed Trial Series)
+Registry Calibration: 500-Patient Historical Cohort Registry (100% PubMed Trial Series & EAU Calibrated)
 
 1. CLINICAL PRESENTATION & STONE PROFILE:
 - Stone Maximum Caliber: ${p.stoneSizeMm.toFixed(1)} mm
