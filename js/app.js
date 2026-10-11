@@ -53,6 +53,7 @@ const elements = {
   lblPatientAge: document.getElementById("lblPatientAge"),
   genderSelector: document.getElementById("genderSelector"),
   lblPatientGender: document.getElementById("lblPatientGender"),
+  lblDemographicsSummary: document.getElementById("lblDemographicsSummary"),
   btnStepAgeMinus: document.getElementById("btnStepAgeMinus"),
   btnStepAgePlus: document.getElementById("btnStepAgePlus"),
   btnGenderMale: document.getElementById("btnGenderMale"),
@@ -736,6 +737,9 @@ function renderIntakeDisplays() {
   const isFemale = (p.sex || "M").toUpperCase() === "F";
   if (elements.lblPatientGender) {
     elements.lblPatientGender.textContent = isFemale ? "Female (F)" : "Male (M)";
+  }
+  if (elements.lblDemographicsSummary) {
+    elements.lblDemographicsSummary.textContent = `${p.age || 45}y • ${isFemale ? "FEMALE (F)" : "MALE (M)"}`;
   }
   if (elements.genderSelector) {
     elements.genderSelector.querySelectorAll(".gender-btn").forEach(btn => {
