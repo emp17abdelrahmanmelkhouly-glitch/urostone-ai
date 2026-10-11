@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>UROSTONE.AI — Ain Shams University | Clinical Calculus Workstation (EAU Protocol)</title>
-  <meta name="description" content="AI-assisted clinical decision support system for urologists to predict spontaneous passage of urinary calculi using EAU guidelines and a 400-patient historical cohort registry.">
+  <meta name="description" content="AI-assisted clinical decision support system for urologists to predict spontaneous passage of urinary calculi using EAU guidelines and a 500-patient historical cohort registry.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="UroStone AI">
@@ -41,7 +41,7 @@
           <span class="asu-affiliation-text">(An Ain Shams University Project &bull; Department of Urology)</span>
           <span class="sub-sep">&bull;</span>
           <span class="telemetry-dot"></span>
-          <span>400-PATIENT CLINICAL REGISTRY &bull; EAU UROLITHIASIS PROTOCOL</span>
+          <span>500-PATIENT CLINICAL REGISTRY &bull; EAU UROLITHIASIS PROTOCOL</span>
         </div>
       </div>
     </div>
@@ -54,7 +54,7 @@
       </button>
       <button class="tab-btn" id="tabBtnRegistry" data-target="tabRegistry" role="tab" aria-selected="false">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-        <span>Cohort Registry (400)</span>
+        <span>Cohort Registry (500)</span>
       </button>
       <button class="tab-btn" id="tabBtnReport" data-target="tabReport" role="tab" aria-selected="false">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
@@ -633,14 +633,14 @@
             </div>
           </div>
 
-          <!-- Case-Based Reasoning: Top Proximate Historical Cases from 400 Cohort -->
+          <!-- Case-Based Reasoning: Top Proximate Historical Cases from 500 Cohort -->
           <div class="panel">
             <div class="panel-header">
               <h3 class="panel-title">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                 <span>Case-Based Correlation &bull; Top Historical Patient Matches</span>
               </h3>
-              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-primary-light); font-weight: 700;" id="lblCohortDbCount">Cohort: 400 cases</span>
+              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-primary-light); font-weight: 700;" id="lblCohortDbCount">Cohort: 500 cases</span>
             </div>
 
             <!-- Matched Cohort Outcome Summary -->
@@ -670,14 +670,14 @@
     </section>
 
     <!-- ==============================================
-         TAB 2: HISTORICAL COHORT REGISTRY (400 CASES)
+         TAB 2: HISTORICAL COHORT REGISTRY (500 CASES)
          ============================================== -->
     <section id="tabRegistry" class="tab-content" role="tabpanel">
       <!-- Cohort Summary Metric Cards -->
       <div class="cohort-overview-row">
         <div class="summary-card">
           <span class="summary-card-lbl">Total Registered Patients</span>
-          <span class="summary-card-val" id="statTotalCases" style="color: var(--color-primary-light);">400</span>
+          <span class="summary-card-val" id="statTotalCases" style="color: var(--color-primary-light);">500</span>
         </div>
         <div class="summary-card">
           <span class="summary-card-lbl">Spontaneous Expulsion Rate</span>
@@ -721,7 +721,7 @@
       <div class="registry-toolbar">
         <div class="search-input-wrapper">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input type="text" id="registrySearch" class="search-input" placeholder="Search 400 cases by ID, composition, or notes...">
+          <input type="text" id="registrySearch" class="search-input" placeholder="Search 500 cases by ID, composition, or notes...">
         </div>
 
         <div class="filter-group">
@@ -740,7 +740,7 @@
             <option value="intervention">Required Intervention</option>
           </select>
 
-          <button class="btn" id="btnExportCsv" title="Export 400 registry cases as CSV">
+          <button class="btn" id="btnExportCsv" title="Export 500 registry cases as CSV">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             <span>Export CSV</span>
           </button>
@@ -756,8 +756,8 @@
             <span>Record Outcome</span>
           </button>
 
-          <button class="btn" id="btnResetCohort" title="Reset to calibrated 400-patient dataset" style="color: var(--text-muted);">
-            <span>Reset 400</span>
+          <button class="btn" id="btnResetCohort" title="Reset to calibrated 500-patient dataset" style="color: var(--text-muted);">
+            <span>Reset 500</span>
           </button>
         </div>
       </div>
@@ -810,12 +810,12 @@
               <span class="report-dept-badge">FACULTY OF MEDICINE &bull; DEPARTMENT OF UROLOGY</span>
             </div>
             <h2 class="report-doc-title">Urology Consultation &amp; Calculus Passage Assessment</h2>
-            <div class="report-doc-sub">Strict EAU Guidelines on Urolithiasis Protocol &bull; Calibrated with 400-Patient Registry</div>
+            <div class="report-doc-sub">Strict EAU Guidelines on Urolithiasis Protocol &bull; Calibrated with 500-Patient Registry</div>
           </div>
           <div style="text-align: right; font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-primary-light);">
             <div>DATE: <span id="reportDate"></span></div>
             <div>PROTOCOL: EAU GUIDELINES VERIFIED</div>
-            <div style="color: var(--text-muted); font-size: 0.72rem; margin-top: 2px;">ASU-URO-REGISTRY #400</div>
+            <div style="color: var(--text-muted); font-size: 0.72rem; margin-top: 2px;">ASU-URO-REGISTRY #500</div>
           </div>
         </div>
 
@@ -861,11 +861,11 @@
           </div>
         </div>
 
-        <!-- Section 2: AI Predictive Analysis & 400 Cohort Matching -->
+        <!-- Section 2: AI Predictive Analysis & 500 Cohort Matching -->
         <div class="report-section">
           <div class="report-sec-title">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
-            <span>2. Spontaneous Passage Prediction &amp; 400-Patient Cohort Analysis</span>
+            <span>2. Spontaneous Passage Prediction &amp; 500-Patient Cohort Analysis</span>
           </div>
           <div class="report-text-block" id="repAiAnalysisText">
             <!-- Dynamically populated -->
@@ -916,7 +916,7 @@
       </div>
       <div class="footer-protocol-info">
         <span class="footer-meta-pill">EAU Guidelines Compliant</span>
-        <span class="footer-meta-pill">400-Patient Validated Registry</span>
+        <span class="footer-meta-pill">500-Patient Validated Registry</span>
         <span class="footer-meta-pill">Clinical Decision Support System (CDSS)</span>
       </div>
     </div>
@@ -930,7 +930,7 @@
       <div class="modal-header">
         <h3 class="panel-title" style="font-size: 1.05rem;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-          <span>Record Completed Patient Outcome (400 Cohort)</span>
+          <span>Record Completed Patient Outcome (500 Cohort)</span>
         </h3>
         <button class="btn-icon" id="btnCloseModal" aria-label="Close modal">&times;</button>
       </div>
@@ -1029,7 +1029,7 @@
 
         <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem;">
           <button type="button" class="btn" id="btnCancelModal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save to 400 Registry</button>
+          <button type="submit" class="btn btn-primary">Save to 500 Registry</button>
         </div>
       </form>
     </div>
@@ -1292,7 +1292,7 @@
     </button>
     <button type="button" class="mobile-nav-item" data-target="tabRegistry">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path></svg>
-      <span>Cohort 400</span>
+      <span>Cohort 500</span>
     </button>
     <button type="button" class="mobile-nav-item" data-target="tabReport">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>

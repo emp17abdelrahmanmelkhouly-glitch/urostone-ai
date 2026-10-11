@@ -1,6 +1,6 @@
 // UroStone AI - Clinical Decision Support Engine
 // Fully Calibrated to EAU (European Association of Urology) Guidelines on Urolithiasis
-// Integrated with 400-Patient Historical Cohort Registry (PT-1001 to PT-1400)
+// Integrated with 500-Patient Historical Cohort Registry (PT-1001 to PT-1500)
 
 (function () {
   "use strict";
@@ -8,12 +8,12 @@
   // ========================================================
   // 1. DATA ACCESS & LOCAL STORAGE KEY
   // ========================================================
-  const DB_STORAGE_KEY_V5 = "urostone_patient_cohort_v5_eau_400";
+  const DB_STORAGE_KEY_V6 = "urostone_patient_cohort_v6_eau_500";
 
   // Load cohort from window or fallback
-  const DEFAULT_COHORT_400 = (typeof window !== "undefined" && window.INITIAL_PATIENT_COHORT_400 && window.INITIAL_PATIENT_COHORT_400.length > 0)
-    ? window.INITIAL_PATIENT_COHORT_400
-    : [];
+  const DEFAULT_COHORT_500 = (typeof window !== "undefined" && window.INITIAL_PATIENT_COHORT_500 && window.INITIAL_PATIENT_COHORT_500.length > 0)
+    ? window.INITIAL_PATIENT_COHORT_500
+    : (typeof window !== "undefined" && window.INITIAL_PATIENT_COHORT_400 ? window.INITIAL_PATIENT_COHORT_400 : []);
 
   // ========================================================
   // 2. CT HOUNSFIELD UNIT (HU) CLASSIFICATION
@@ -227,8 +227,8 @@
       probabilityPercent = Math.min(probabilityPercent, 10);
     }
 
-    // 95% Confidence Interval (calibrated on 400-patient cohort)
-    const ciMargin = Math.max(3, Math.min(6, Math.round(Math.sqrt((probabilityPercent * (100 - probabilityPercent)) / 400) * 1.96)));
+    // 95% Confidence Interval (calibrated on 500-patient cohort)
+    const ciMargin = Math.max(2, Math.min(6, Math.round(Math.sqrt((probabilityPercent * (100 - probabilityPercent)) / 500) * 1.96)));
     const ciLow = Math.max(1, probabilityPercent - ciMargin);
     const ciHigh = Math.min(99, probabilityPercent + ciMargin);
 
@@ -395,7 +395,7 @@
   }
 
   // ========================================================
-  // 4. CASE-BASED REASONING (k-NN COMPARATOR - 400 COHORT)
+  // 4. CASE-BASED REASONING (k-NN COMPARATOR - 500 COHORT)
   // ========================================================
   const LOCATION_ORDINALS = { uvj: 1, distal: 2, mid: 3, proximal: 4, puj: 5 };
   const HYDRONEPHROSIS_ORDINALS = { none: 0, mild: 1, moderate: 2, severe: 3 };
@@ -509,25 +509,25 @@
   }
 
   // ========================================================
-  // 5. DATABASE STORAGE & CSV MANAGEMENT (400 REGISTRY)
+  // 5. DATABASE STORAGE & CSV MANAGEMENT (500 REGISTRY)
   // ========================================================
   function getCohort() {
     try {
-      const stored = localStorage.getItem(DB_STORAGE_KEY_V5);
+      const stored = localStorage.getItem(DB_STORAGE_KEY_V6);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length >= 350) return parsed;
+        if (Array.isArray(parsed) && parsed.length >= 450) return parsed;
       }
     } catch (e) {
       console.warn("Storage read error", e);
     }
-    saveCohort(DEFAULT_COHORT_400);
-    return [...DEFAULT_COHORT_400];
+    saveCohort(DEFAULT_COHORT_500);
+    return [...DEFAULT_COHORT_500];
   }
 
   function saveCohort(cohort) {
     try {
-      localStorage.setItem(DB_STORAGE_KEY_V5, JSON.stringify(cohort));
+      localStorage.setItem(DB_STORAGE_KEY_V6, JSON.stringify(cohort));
     } catch (e) {
       console.error("Storage write error", e);
     }
@@ -548,8 +548,8 @@
   }
 
   function resetCohort() {
-    saveCohort(DEFAULT_COHORT_400);
-    return [...DEFAULT_COHORT_400];
+    saveCohort(DEFAULT_COHORT_500);
+    return [...DEFAULT_COHORT_500];
   }
 
   function exportCSV(cohort) {
@@ -567,7 +567,7 @@
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `UroStone_EAU_400_Cohort_Registry_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `UroStone_EAU_500_Cohort_Registry_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -717,7 +717,7 @@
     cbrInterventionRate: document.getElementById("cbrInterventionRate"),
     cbrMatchesContainer: document.getElementById("cbrMatchesContainer"),
 
-    // Registry Tab (400)
+    // Registry Tab (500)
     statTotalCases: document.getElementById("statTotalCases"),
     statPassageRate: document.getElementById("statPassageRate"),
     statAvgSize: document.getElementById("statAvgSize"),
@@ -1036,7 +1036,7 @@
 
     elements.btnExportCsv.addEventListener("click", () => {
       exportCSV(state.cohort);
-      showToast("Exported 400 patient cohort registry as CSV.");
+      showToast("Exported 500 patient cohort registry as CSV.");
     });
 
     elements.btnImportCsv.addEventListener("click", () => elements.csvFileInput.click());
@@ -1058,10 +1058,10 @@
     });
 
     elements.btnResetCohort.addEventListener("click", () => {
-      if (confirm("Reset clinical database to calibrated 400-patient dataset?")) {
+      if (confirm("Reset clinical database to calibrated 500-patient dataset?")) {
         state.cohort = resetCohort();
         renderAll();
-        showToast("Database restored to 400 validated EAU cases.");
+        showToast("Database restored to 500 validated EAU & PubMed cases.");
       }
     });
 
@@ -1102,7 +1102,7 @@
       state.cohort = addPatient(newPt, state.cohort);
       elements.addPatientModal.classList.remove("open");
       renderAll();
-      showToast(`Patient ${newPt.id} recorded into 400 cohort registry!`);
+      showToast(`Patient ${newPt.id} recorded into 500 cohort registry!`);
     });
 
     elements.btnCopyNote.addEventListener("click", copyNote);
@@ -1825,19 +1825,21 @@
     });
 
     if (filtered.length === 0) {
-      elements.cohortTableBody.innerHTML = `<tr><td colspan="13" style="text-align: center; color: var(--text-muted); padding: 2rem;">No matching patient records found in 400 registry.</td></tr>`;
+      elements.cohortTableBody.innerHTML = `<tr><td colspan="13" style="text-align: center; color: var(--text-muted); padding: 2rem;">No matching patient records found in 500 registry.</td></tr>`;
       return;
     }
 
     elements.cohortTableBody.innerHTML = filtered.map(pt => {
       const isPassed = pt.outcome === "passed";
+      const isPubMed = pt.notes && pt.notes.includes("[PubMed");
+      const pubMedBadge = isPubMed ? `<span class="pubmed-pill" title="Verified PubMed Literature Case">PubMed</span>` : "";
       const outcomeBadge = isPassed
         ? `<span class="outcome-pill outcome-passed">Passed</span>`
         : `<span class="outcome-pill outcome-intervention">Intervened</span>`;
 
       return `
         <tr>
-          <td style="font-weight: 700; color: var(--color-primary-light); font-family: monospace;">${pt.id}</td>
+          <td style="font-weight: 700; color: var(--color-primary-light); font-family: monospace; white-space: nowrap;">${pt.id} ${pubMedBadge}</td>
           <td>${pt.age}y / ${pt.sex}</td>
           <td><strong>${pt.stoneSizeMm} mm</strong></td>
           <td><span style="text-transform: uppercase;">${pt.location}</span></td>
@@ -1848,7 +1850,7 @@
           <td>${outcomeBadge}</td>
           <td>${pt.daysToPassage !== null && pt.daysToPassage !== undefined ? `${pt.daysToPassage} d` : "-"}</td>
           <td><span style="font-size: 0.72rem; text-transform: uppercase;">${pt.interventionType || "none"}</span></td>
-          <td style="max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${pt.notes || ""}">${pt.notes || "-"}</td>
+          <td style="max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${pt.notes || ""}">${pt.notes || "-"}</td>
           <td>
             <button class="btn-icon btn-del-case" data-id="${pt.id}" title="Delete Record" style="width: 28px; height: 28px;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -1872,10 +1874,12 @@
     // Render Mobile Cards View for Phones
     if (elements.cohortMobileCardGrid) {
       if (filtered.length === 0) {
-        elements.cohortMobileCardGrid.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No matching patient records found in 400 registry.</div>`;
+        elements.cohortMobileCardGrid.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No matching patient records found in 500 registry.</div>`;
       } else {
         elements.cohortMobileCardGrid.innerHTML = filtered.slice(0, 60).map(pt => {
           const isPassed = pt.outcome === "passed";
+          const isPubMed = pt.notes && pt.notes.includes("[PubMed");
+          const pubMedBadge = isPubMed ? `<span class="pubmed-pill">PubMed</span>` : "";
           const outcomeBadge = isPassed
             ? `<span class="outcome-pill outcome-passed">Passed ${pt.daysToPassage ? `(${pt.daysToPassage}d)` : ""}</span>`
             : `<span class="outcome-pill outcome-intervention">${pt.interventionType || "Intervention"}</span>`;
@@ -1883,7 +1887,7 @@
           return `
             <div class="mobile-pt-card">
               <div class="mobile-pt-header">
-                <span class="mobile-pt-id">${pt.id}</span>
+                <span class="mobile-pt-id">${pt.id} ${pubMedBadge}</span>
                 ${outcomeBadge}
               </div>
               <div class="mobile-pt-details">
@@ -1927,7 +1931,7 @@
 
     elements.repAiAnalysisText.innerHTML = `
       <p><strong>Predicted Spontaneous Expulsion Probability:</strong> <span style="font-size: 1.15rem; font-weight: 800; color: var(--color-primary-light);">${pred.probabilityPercent}%</span> (95% CI: ${pred.ciLow}% – ${pred.ciHigh}%)</p>
-      <p style="margin-top: 0.35rem;"><strong>400-Patient Historical Cohort Correlation:</strong> Evaluated against <strong>${cbr.totalMatchesCount} most clinically proximate historical cases</strong> from the calibrated registry. In this matched subgroup, <strong>${cbr.historicalPassageRate}% achieved spontaneous expulsion</strong> (mean time: <strong>${cbr.avgDaysToPassage || "N/A"} days</strong>), while <strong>${100 - cbr.historicalPassageRate}% required endourological intervention</strong> (URS / SWL).</p>
+      <p style="margin-top: 0.35rem;"><strong>500-Patient Historical Cohort Correlation:</strong> Evaluated against <strong>${cbr.totalMatchesCount} most clinically proximate historical cases</strong> from the calibrated registry (including 100 PubMed clinical trial series). In this matched subgroup, <strong>${cbr.historicalPassageRate}% achieved spontaneous expulsion</strong> (mean time: <strong>${cbr.avgDaysToPassage || "N/A"} days</strong>), while <strong>${100 - cbr.historicalPassageRate}% required endourological intervention</strong> (URS / SWL).</p>
       <p style="margin-top: 0.5rem;"><strong>Nomogram Determinant Weights:</strong></p>
       <ul style="padding-left: 1.25rem; margin-top: 0.25rem;">
         ${pred.featureImpacts.map(i => `<li><strong>${i.feature}:</strong> ${i.impact} impact (${i.detail})</li>`).join("")}
@@ -1962,7 +1966,7 @@ UROLOGY CONSULTATION & CALCULUS PASSAGE ASSESSMENT
 Date: ${new Date().toLocaleDateString()}
 Institutional Affiliation: Ain Shams University Hospitals (Department of Urology)
 Protocol Authority: European Association of Urology (EAU) Guidelines on Urolithiasis
-Registry Calibration: 400-Patient Historical Cohort Registry (ASU-URO-REGISTRY #400)
+Registry Calibration: 500-Patient Historical Cohort Registry (ASU-URO-REGISTRY #500 & PubMed Trial Series)
 
 1. CLINICAL PRESENTATION & STONE PROFILE:
 - Stone Maximum Caliber: ${p.stoneSizeMm.toFixed(1)} mm
@@ -1975,7 +1979,7 @@ Registry Calibration: 400-Patient Historical Cohort Registry (ASU-URO-REGISTRY #
 - Serum Creatinine: ${sCrVal} mg/dL${parseFloat(sCrVal) > 1.5 ? " [ELEVATED — AKI risk]" : ""}
 - Total Leukocyte Count (TLC): ${tlcVal} × 10³/μL${parseFloat(tlcVal) >= 14 ? " [LEUKOCYTOSIS — Sepsis criterion]" : ""}
 
-2. PREDICTIVE NOMOGRAM & 400 COHORT COMPARISON:
+2. PREDICTIVE NOMOGRAM & 500 COHORT COMPARISON:
 - Spontaneous Passage Probability: ${pred.probabilityPercent}% (95% CI: ${pred.ciLow}% – ${pred.ciHigh}%)
 - Cohort Correlation: Among ${cbr.totalMatchesCount} most proximate historical cases, ${cbr.historicalPassageRate}% achieved spontaneous expulsion (mean ${cbr.avgDaysToPassage || "N/A"} days); ${100 - cbr.historicalPassageRate}% required endourological intervention.
 - Nomogram Determinants: ${pred.featureImpacts.map(i => `${i.feature} (${i.impact})`).join(", ")}

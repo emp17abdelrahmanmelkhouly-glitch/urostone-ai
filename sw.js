@@ -1,7 +1,7 @@
 // UroStone AI - Service Worker (Offline PWA Engine)
-// Calibrated with EAU Guidelines & 400-Patient Historical Cohort
+// Calibrated with EAU Guidelines & 500-Patient Historical Cohort
 
-const CACHE_NAME = "urostone-ai-v2.1";
+const CACHE_NAME = "urostone-ai-v2.2";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",

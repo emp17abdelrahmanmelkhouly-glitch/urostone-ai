@@ -6,7 +6,7 @@
   "display": "standalone",
   "background_color": "#0b1120",
   "theme_color": "#0b1120",
-  "description": "EAU-Calibrated Clinical Calculus Predictor & Workstation with 400-Patient Cohort Registry (Ain Shams University).",
+  "description": "EAU-Calibrated Clinical Calculus Predictor & Workstation with 500-Patient Cohort Registry (Ain Shams University).",
   "orientation": "any",
   "categories": ["medical", "health", "productivity", "utilities"],
   "icons": [
@@ -43,8 +43,8 @@
       "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
     },
     {
-      "name": "400-Patient Registry",
-      "short_name": "Cohort 400",
+      "name": "500-Patient Registry",
+      "short_name": "Cohort 500",
       "url": "./index.html#tabRegistry",
       "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
     }
