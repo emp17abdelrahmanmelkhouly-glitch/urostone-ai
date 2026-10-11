@@ -1,0 +1,52 @@
+{
+  "name": "UroStone AI — Clinical Calculus Workstation",
+  "short_name": "UroStone AI",
+  "start_url": "./index.html",
+  "id": "urostone-ai-pwa",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#0b1120",
+  "description": "EAU-Calibrated Clinical Calculus Predictor & Workstation with 400-Patient Cohort Registry (Ain Shams University).",
+  "orientation": "any",
+  "categories": ["medical", "health", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Spontaneous Predictor",
+      "short_name": "Predictor",
+      "url": "./index.html#tabPredictor",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "EAU Guidelines Reference",
+      "short_name": "EAU Guide",
+      "url": "./index.html#eau-ref",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "400-Patient Registry",
+      "short_name": "Cohort 400",
+      "url": "./index.html#tabRegistry",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
+    }
+  ]
+}

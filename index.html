@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>UROSTONE.AI — Ain Shams University | Clinical Calculus Workstation (EAU Protocol)</title>
+  <meta name="description" content="AI-assisted clinical decision support system for urologists to predict spontaneous passage of urinary calculi using EAU guidelines and a 400-patient historical cohort registry.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="UroStone AI">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="UroStone AI - Ain Shams University">
+  <meta name="theme-color" content="#0b1120">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+</head>
+<body>
+
+  <!-- Clinical Workstation Header -->
+  <header class="app-header">
+    <div class="brand-wrapper">
+      <div class="brand-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 7v5l3 3"></path>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">
+          <span>UROSTONE</span><span class="brand-accent">.AI</span>
+          <span class="brand-badge-asu">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+            AIN SHAMS UNIVERSITY
+          </span>
+          <span class="brand-badge-eau">EAU GUIDELINES CERTIFIED</span>
+        </div>
+        <div class="brand-subtitle">
+          <span class="asu-affiliation-text">(An Ain Shams University Project &bull; Department of Urology)</span>
+          <span class="sub-sep">&bull;</span>
+          <span class="telemetry-dot"></span>
+          <span>400-PATIENT CLINICAL REGISTRY &bull; EAU UROLITHIASIS PROTOCOL</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" role="tablist">
+      <button class="tab-btn active" id="tabBtnPredictor" data-target="tabPredictor" role="tab" aria-selected="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+        <span>Clinical Predictor</span>
+      </button>
+      <button class="tab-btn" id="tabBtnRegistry" data-target="tabRegistry" role="tab" aria-selected="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span>Cohort Registry (400)</span>
+      </button>
+      <button class="tab-btn" id="tabBtnReport" data-target="tabReport" role="tab" aria-selected="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        <span>EMR Clinical Note</span>
+      </button>
+    </nav>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <!-- Open on Phone (Mobile Connect) Button -->
+      <button class="btn-phone-connect" id="btnOpenMobileModal" title="Open on Phone (Scan QR Code / Wi-Fi Access)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="5" y="2" width="14" height="20" rx="3" ry="3"></rect>
+          <line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5"></line>
+        </svg>
+        <span>Open on Phone</span>
+        <span class="mobile-pulse-dot"></span>
+      </button>
+
+      <!-- EAU Guidelines Reference Modal Trigger -->
+      <button class="btn-eau-ref" id="btnOpenEauRef" title="Open European Association of Urology Guidelines Reference">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>EAU Guidelines Reference</span>
+      </button>
+
+      <!-- Theme Toggle -->
+      <button class="btn-icon" id="themeToggleBtn" title="Toggle Dark/Light Mode" aria-label="Toggle theme">
+        <svg id="themeIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+
+      <button class="btn btn-primary" id="btnQuickReportHeader">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        <span>Generate Note</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Body Content -->
+  <main class="app-container">
+
+    <!-- ==============================================
+         TAB 1: CLINICAL PREDICTOR & EAU DECISION CENTER
+         ============================================== -->
+    <section id="tabPredictor" class="tab-content active" role="tabpanel">
+      <!-- Mobile Quick Live Outcome Summary Card (Sticky on small screens) -->
+      <div class="mobile-sticky-summary" id="mobileStickySummary">
+        <div class="mobile-summary-gauge">
+          <span class="mobile-prob-val" id="mobileProbVal">84%</span>
+          <span class="mobile-prob-sub">Passage</span>
+        </div>
+        <div class="mobile-summary-info">
+          <div class="mobile-summary-status" id="mobileSummaryStatus">OBSERVE (MET INDICATED)</div>
+          <div class="mobile-summary-timeline" id="mobileSummaryTimeline">~4 to 9 days &bull; UVJ</div>
+        </div>
+        <button type="button" class="btn-mobile-jump" id="btnMobileJumpToPlan">Plan &darr;</button>
+      </div>
+
+      <div class="predictor-layout">
+
+        <!-- LEFT COLUMN: PATIENT INTAKE CONSOLE -->
+        <div class="panel intake-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span>Patient Parameters Console</span>
+            </h2>
+            <button class="btn-icon" id="btnResetIntake" title="Reset to standard clinical presentation">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            </button>
+          </div>
+
+          <!-- Minimalist Anatomical Urinary Tract Schematic -->
+          <div class="anatomy-card-clean">
+            <div class="anatomy-header">
+              <span>Urinary Tract Anatomical Level</span>
+              <span id="lblActiveAnatomyBadge" style="font-family: var(--font-mono); color: var(--color-primary-light); font-weight: 700;">LOCATION: UVJ</span>
+            </div>
+            <div class="anatomy-stage">
+              <svg id="urinaryTractSvg" width="100%" height="160" viewBox="0 0 400 160" style="max-height: 180px; width: 100%; height: auto;">
+                <defs>
+                  <linearGradient id="kidneyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="rgba(14, 165, 233, 0.15)" />
+                    <stop offset="100%" stop-color="rgba(2, 132, 199, 0.05)" />
+                  </linearGradient>
+                  <linearGradient id="pelvisGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="rgba(56, 189, 248, 0.4)" />
+                    <stop offset="100%" stop-color="rgba(56, 189, 248, 0.7)" />
+                  </linearGradient>
+                  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                  <filter id="redGlow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="3.5" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                  <radialGradient id="stoneRedGrad" cx="35%" cy="35%" r="65%">
+                    <stop offset="0%" stop-color="#fca5a5" />
+                    <stop offset="50%" stop-color="#ef4444" />
+                    <stop offset="100%" stop-color="#991b1b" />
+                  </radialGradient>
+                </defs>
+
+                <!-- Kidney Anatomy (Cortex/Medulla) -->
+                <path d="M 40,25 C 10,25 5,85 45,95 C 65,100 80,85 75,65 C 70,55 70,45 75,35 C 80,20 65,25 40,25 Z" 
+                      fill="url(#kidneyGrad)" stroke="#0ea5e9" stroke-width="1.5" />
+                <!-- Renal Pelvis and Major Calyces -->
+                <path d="M 65,45 C 50,45 50,75 65,75 C 75,75 85,65 85,60 C 85,55 75,45 65,45 Z" 
+                      fill="url(#pelvisGrad)" stroke="#38bdf8" stroke-width="1" />
+                
+                <!-- Ureter Tube (Background/Shadow) -->
+                <path d="M 80,60 C 110,65 140,90 170,105 C 200,120 240,125 270,120" 
+                      fill="none" stroke="rgba(14, 165, 233, 0.15)" stroke-width="14" stroke-linecap="round" />
+                <!-- Ureter Tube (Core Lumen) -->
+                <path d="M 80,60 C 110,65 140,90 170,105 C 200,120 240,125 270,120" 
+                      fill="none" stroke="#0ea5e9" stroke-width="5" stroke-linecap="round" />
+
+                <!-- Iliac Vessels Crossing (Artery & Vein) -->
+                <path d="M 160,85 Q 170,105 155,130" fill="none" stroke="rgba(244,63,94,0.4)" stroke-width="7" stroke-linecap="round" />
+                <path d="M 175,85 Q 185,105 170,130" fill="none" stroke="rgba(59,130,246,0.4)" stroke-width="7" stroke-linecap="round" />
+
+                <!-- Urinary Bladder -->
+                <path d="M 260,115 C 280,95 330,95 350,115 C 360,130 350,150 305,150 C 260,150 250,130 260,115 Z" 
+                      fill="url(#kidneyGrad)" stroke="#0ea5e9" stroke-width="1.5" />
+
+                <!-- Labels -->
+                <text x="35" y="60" fill="var(--text-muted)" font-size="9" font-family="var(--font-mono)" font-weight="700" letter-spacing="1">KIDNEY</text>
+                <text x="305" y="130" fill="var(--text-muted)" font-size="9" font-family="var(--font-mono)" font-weight="700" letter-spacing="1">BLADDER</text>
+
+                <!-- Interaction Nodes -->
+                <!-- 1. PUJ -->
+                <g class="anatomy-part" data-location="puj" id="partPuj">
+                  <circle class="part-ring" cx="82" cy="60" r="10" />
+                  <circle class="part-core" cx="82" cy="60" r="4.5" />
+                  <text class="part-text" x="93" y="52">1. PUJ</text>
+                </g>
+
+                <!-- 2. Proximal Ureter -->
+                <g class="anatomy-part" data-location="proximal" id="partProximal">
+                  <circle class="part-ring" cx="122" cy="76" r="10" />
+                  <circle class="part-core" cx="122" cy="76" r="4.5" />
+                  <text class="part-text" x="110" y="60">2. Proximal</text>
+                </g>
+
+                <!-- 3. Mid Ureter -->
+                <g class="anatomy-part" data-location="mid" id="partMid">
+                  <circle class="part-ring" cx="170" cy="105" r="10" />
+                  <circle class="part-core" cx="170" cy="105" r="4.5" />
+                  <text class="part-text" x="184" y="102">3. Mid</text>
+                </g>
+
+                <!-- 4. Distal Ureter -->
+                <g class="anatomy-part" data-location="distal" id="partDistal">
+                  <circle class="part-ring" cx="225" cy="120" r="10" />
+                  <circle class="part-core" cx="225" cy="120" r="4.5" />
+                  <text class="part-text" x="215" y="140">4. Distal</text>
+                </g>
+
+                <!-- 5. UVJ -->
+                <g class="anatomy-part active-part" data-location="uvj" id="partUvj">
+                  <circle class="part-ring" cx="268" cy="120" r="10" />
+                  <circle class="part-core" cx="268" cy="120" r="4.5" />
+                  <text class="part-text" x="284" y="116">5. UVJ</text>
+                </g>
+
+                <!-- Dynamic Red Calculus Target Marker -->
+                <g id="diagramStoneMarker" transform="translate(268, 120)" class="stone-marker-beacon">
+                  <circle class="beacon-pulse" r="15" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.85" />
+                  <circle class="beacon-core" r="6.5" fill="url(#stoneRedGrad)" stroke="#ffffff" stroke-width="1.8" filter="url(#redGlow)" />
+                  <circle r="1.8" fill="#ffffff" />
+                  <g class="stone-badge-tag" transform="translate(0, -18)">
+                    <rect x="-35" y="-11" width="70" height="15" rx="4" fill="rgba(15, 23, 42, 0.94)" stroke="#ef4444" stroke-width="1.2" />
+                    <text x="0" y="0" text-anchor="middle" fill="#fca5a5" font-size="7.5" font-weight="800" font-family="var(--font-mono)" letter-spacing="0.5">● STONE SITE</text>
+                  </g>
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Anatomical Location Selection Buttons -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Anatomical Segment Selector</span>
+              <span class="label-val" id="lblLocation">UVJ</span>
+            </div>
+            <div class="location-grid" id="locationSelector">
+              <button type="button" class="location-btn active" data-location="uvj">
+                <span>UVJ (Terminal Junction)</span>
+                <span class="loc-badge">Highest passage (~85%)</span>
+              </button>
+              <button type="button" class="location-btn" data-location="distal">
+                <span>Distal (Lower) Ureter</span>
+                <span class="loc-badge">High passage (~70%)</span>
+              </button>
+              <button type="button" class="location-btn" data-location="mid">
+                <span>Mid Ureter (Iliac Crossing)</span>
+                <span class="loc-badge">Moderate passage (~55%)</span>
+              </button>
+              <button type="button" class="location-btn" data-location="proximal">
+                <span>Proximal (Upper) Ureter</span>
+                <span class="loc-badge">Lower passage (~35%)</span>
+              </button>
+              <button type="button" class="location-btn" data-location="puj" style="grid-column: span 2;">
+                <span>PUJ (Pelviureteric Junction)</span>
+                <span class="loc-badge">Lowest spontaneous passage (~25%)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Stone Size (mm) -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Maximum Calculus Caliber</span>
+              <span class="label-val" id="lblStoneSize">4.5 mm</span>
+            </div>
+            <div class="slider-container">
+              <input type="range" id="inputStoneSize" class="range-slider" min="1.0" max="15.0" step="0.1" value="4.5">
+            </div>
+            <!-- Touch Stepper & Quick Size Presets for Mobile -->
+            <div class="quick-step-row">
+              <button type="button" class="btn-stepper" id="btnStepStoneMinus" title="Decrease 0.5 mm">&minus;0.5</button>
+              <div class="quick-chip-group">
+                <button type="button" class="quick-chip" data-stone="3.0">&le;3mm</button>
+                <button type="button" class="quick-chip active" data-stone="4.5">4.5mm</button>
+                <button type="button" class="quick-chip" data-stone="5.5">5.5mm</button>
+                <button type="button" class="quick-chip" data-stone="7.0">7mm</button>
+                <button type="button" class="quick-chip" data-stone="10.0">&ge;10mm</button>
+              </div>
+              <button type="button" class="btn-stepper" id="btnStepStonePlus" title="Increase 0.5 mm">+0.5</button>
+            </div>
+            <div class="size-preview-row">
+              <div class="size-preview-info">
+                <span id="lblSizeCaliberText" style="font-weight: 700; font-size: 0.84rem;">Intermediate Caliber (4–6mm)</span>
+                <span class="size-caliber-label" id="lblSizeGuideline">EAU § 3.4.3: MET indicated for distal stones; ~60% passage</span>
+              </div>
+              <div class="size-circle-wrapper">
+                <div class="size-circle" id="visualStoneCircle" style="width: 16px; height: 16px;" title="Target Calculus Scale"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CT Attenuation (Hounsfield Units - HU) -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>CT Attenuation Density (HU)</span>
+              <span class="label-val" id="lblHuValue">750 HU</span>
+            </div>
+            <div class="slider-container">
+              <input type="range" id="inputHuValue" class="range-slider" min="150" max="1600" step="10" value="750">
+            </div>
+            <!-- Touch Stepper & Quick HU Presets for Mobile -->
+            <div class="quick-step-row">
+              <button type="button" class="btn-stepper" id="btnStepHuMinus" title="Decrease 50 HU">&minus;50</button>
+              <div class="quick-chip-group">
+                <button type="button" class="quick-chip" data-hu="350">Uric (350)</button>
+                <button type="button" class="quick-chip" data-hu="550">Cyst (550)</button>
+                <button type="button" class="quick-chip active" data-hu="750">Struv (750)</button>
+                <button type="button" class="quick-chip" data-hu="950">COM (950)</button>
+                <button type="button" class="quick-chip" data-hu="1250">Brush (1250)</button>
+              </div>
+              <button type="button" class="btn-stepper" id="btnStepHuPlus" title="Increase 50 HU">+50</button>
+            </div>
+            <div class="hu-spectrum-bar">
+              <div class="hu-marker" id="huMarkerIndicator" style="left: 41%;"></div>
+            </div>
+            <div class="hu-classification-card" id="huClassificationBox">
+              <div class="hu-class-tag" id="huClassTitle">
+                <span class="status-dot" id="huDot" style="background-color: #f59e0b;"></span>
+                <span id="huClassName">Struvite / Calcium Oxalate Dihydrate</span>
+              </div>
+              <div class="hu-class-desc" id="huClassDesc">Moderate density. Responsive to MET; favorable fragmentation threshold.</div>
+            </div>
+          </div>
+
+          <!-- Hydronephrosis Severity -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Hydronephrosis Grade</span>
+              <span class="label-val" id="lblHydronephrosis">Mild</span>
+            </div>
+            <div class="segmented-control" id="hydronephrosisSelector">
+              <button type="button" class="segment-btn" data-value="none">None</button>
+              <button type="button" class="segment-btn active" data-value="mild">Mild</button>
+              <button type="button" class="segment-btn" data-value="moderate">Moderate</button>
+              <button type="button" class="segment-btn" data-value="severe">Severe</button>
+            </div>
+          </div>
+
+          <!-- Clinical Symptoms & Medical Expulsive Therapy -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Symptoms &amp; Clinical Management</span>
+            </div>
+
+            <!-- Pain VAS Score -->
+            <div style="margin-bottom: 0.65rem;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 3px;">
+                <span>Pain Score (VAS 1–10)</span>
+                <span id="lblPainScore" style="color: var(--color-primary-light); font-family: var(--font-mono); font-weight: 700;">6 / 10</span>
+              </div>
+              <input type="range" id="inputPainScore" class="range-slider" min="1" max="10" step="1" value="6">
+            </div>
+
+            <!-- Symptom Duration (Days) -->
+            <div style="margin-bottom: 0.65rem;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 3px;">
+                <span>Colic Duration Prior to Presentation</span>
+                <span id="lblDurationDays" style="color: var(--color-primary-light); font-family: var(--font-mono); font-weight: 700;">3 Days</span>
+              </div>
+              <input type="range" id="inputDurationDays" class="range-slider" min="1" max="30" step="1" value="3">
+            </div>
+
+            <!-- Medical Expulsive Therapy (MET) -->
+            <label class="toggle-row">
+              <div class="toggle-label-group">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: var(--color-success);"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                <div>
+                  <div class="toggle-title">Medical Expulsive Therapy (MET)</div>
+                  <div class="toggle-desc">Tamsulosin 0.4mg or Silodosin 8mg PO daily (EAU LoE 1a)</div>
+                </div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="chkMetPrescribed" checked>
+                <span class="slider-switch"></span>
+              </label>
+            </label>
+
+            <!-- Gross Hematuria -->
+            <label class="toggle-row">
+              <div class="toggle-label-group">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: var(--color-danger);"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                <div>
+                  <div class="toggle-title">Gross / Macroscopic Hematuria</div>
+                  <div class="toggle-desc">Macroscopic blood in urine at presentation</div>
+                </div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="chkHematuria">
+                <span class="slider-switch"></span>
+              </label>
+            </label>
+          </div>
+
+          <!-- Red Flags & Sepsis Toggles -->
+          <div class="form-group">
+            <div class="form-label" style="color: var(--color-danger);">
+              <span>Sepsis &amp; Emergency Criteria (EAU § 3.2.3)</span>
+            </div>
+
+            <!-- Fever / Sepsis Flag -->
+            <label class="toggle-row" style="border-color: rgba(239, 68, 68, 0.4);">
+              <div class="toggle-label-group">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: var(--color-danger);"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                <div>
+                  <div class="toggle-title" style="color: var(--color-danger);">Fever / Pyelonephritis / SIRS Criteria</div>
+                  <div class="toggle-desc">Temp > 38.0°C or suspected infected obstructed system</div>
+                </div>
+              </div>
+              <label class="switch switch-danger">
+                <input type="checkbox" id="chkFever">
+                <span class="slider-switch"></span>
+              </label>
+            </label>
+
+            <!-- Solitary Kidney -->
+            <label class="toggle-row">
+              <div class="toggle-label-group">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-primary-light);"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <div>
+                  <div class="toggle-title">Solitary Kidney</div>
+                  <div class="toggle-desc">Anatomical or functional single kidney with obstruction</div>
+                </div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="chkSolitaryKidney">
+                <span class="slider-switch"></span>
+              </label>
+            </label>
+          </div>
+
+          <!-- Lab Parameters: TLC & Serum Creatinine -->
+          <div class="form-group">
+            <div class="form-label" style="color: var(--color-primary-light);">
+              <span>Laboratory Parameters</span>
+            </div>
+
+            <!-- TLC (Total Leukocyte Count) -->
+            <div class="lab-input-row">
+              <div class="lab-input-header">
+                <div>
+                  <div class="toggle-title">TLC (Total Leukocyte Count)</div>
+                  <div class="toggle-desc">Normal range: 4.5 – 11.0 &times; 10&sup3;/&micro;L &bull; &ge;14.0 triggers sepsis criterion</div>
+                </div>
+                <div class="lab-value-badge">
+                  <span id="lblTlcCount" style="font-family: var(--font-mono); font-weight: 700; color: var(--color-primary-light);">8.0 &times; 10&sup3;/&micro;L</span>
+                  <span id="lblTlcAlert" style="font-size: 0.74rem; font-weight: 600;">Normal range</span>
+                </div>
+              </div>
+              <div class="lab-input-controls">
+                <button type="button" class="btn-stepper" id="btnStepTlcMinus" title="Decrease TLC 0.5k">&minus;0.5</button>
+                <input type="number" id="inputTlcCount" class="lab-input" min="1.0" max="50.0" step="0.1" value="8.0" placeholder="TLC ×10³/μL">
+                <button type="button" class="btn-stepper" id="btnStepTlcPlus" title="Increase TLC 0.5k">+0.5</button>
+              </div>
+            </div>
+
+            <!-- Serum Creatinine -->
+            <div class="lab-input-row" style="margin-top: 0.75rem;">
+              <div class="lab-input-header">
+                <div>
+                  <div class="toggle-title">Serum Creatinine (sCr)</div>
+                  <div class="toggle-desc">Normal: M &lt;1.2 / F &lt;1.0 mg/dL &bull; &gt;1.5 in solitary kidney = AKI risk</div>
+                </div>
+                <div class="lab-value-badge">
+                  <span id="lblSerumCreatinine" style="font-family: var(--font-mono); font-weight: 700; color: var(--color-primary-light);">1.00 mg/dL</span>
+                  <span id="lblCreatinineAlert" style="font-size: 0.74rem; font-weight: 600;">Normal range</span>
+                </div>
+              </div>
+              <div class="lab-input-controls">
+                <button type="button" class="btn-stepper" id="btnStepCrMinus" title="Decrease Creatinine 0.1 mg/dL">&minus;0.1</button>
+                <input type="number" id="inputSerumCreatinine" class="lab-input" min="0.3" max="15.0" step="0.01" value="1.00" placeholder="sCr mg/dL">
+                <button type="button" class="btn-stepper" id="btnStepCrPlus" title="Increase Creatinine 0.1 mg/dL">+0.1</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Case Presets -->
+          <div class="presets-bar">
+            <span style="font-size: 0.74rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Presets:</span>
+            <button type="button" class="preset-chip" id="presetSmallUvj">Small Distal (3.2mm)</button>
+            <button type="button" class="preset-chip" id="presetBorderlineDistal">Borderline Distal (5.5mm)</button>
+            <button type="button" class="preset-chip" id="presetDenseUpper">Dense Upper (7.5mm)</button>
+            <button type="button" class="preset-chip" id="presetEmergencyPyelo" style="border-color: rgba(239, 68, 68, 0.4); color: var(--color-danger);">Emergency Sepsis Alert</button>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: RESULTS & EAU DECISION CENTER -->
+        <div class="results-column">
+
+          <!-- Red Flag Alert Box (Conditional) -->
+          <div class="emergency-alert-box" id="emergencyBanner">
+            <div class="alert-heading">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              <span>EAU RED FLAG: URGENT DECOMPRESSION REQUIRED (LoE 1b, Strong)</span>
+            </div>
+            <div id="emergencyReasonsList" style="font-size: 0.84rem; line-height: 1.5;"></div>
+          </div>
+
+          <!-- PRIMARY EAU CLINICAL GUIDELINE DECISION CARD (EAU EVIDENCE BASE) -->
+          <div class="eau-decision-box" id="eauDecisionCard">
+            <div class="eau-box-header">
+              <div class="eau-title-group">
+                <div class="eau-title-eyebrow">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                  <span>European Association of Urology (EAU) Guideline Mandate</span>
+                </div>
+                <h3 class="eau-main-headline" id="eauMainHeadline">Favorable Candidate for Conservative Surveillance with MET</h3>
+              </div>
+
+              <!-- EAU Evidence Badges -->
+              <div class="eau-badges-row">
+                <span class="eau-pill eau-pill-evidence" id="eauSectionBadge">EAU Section 3.4.3</span>
+                <span class="eau-pill eau-pill-evidence" id="eauLoEBadge">LoE 1a</span>
+                <span class="eau-pill eau-pill-recommendation" id="eauStrengthBadge">Strong Recommendation</span>
+              </div>
+            </div>
+
+            <!-- EAU Directives Grid -->
+            <div class="eau-directives-grid">
+              <div class="directive-card">
+                <span class="directive-label">Surveillance Safety Ceiling</span>
+                <span class="directive-val alert" id="eauCeilingText">Strict 4-Week Maximum Limit</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);">Prevent irreversible loss of GFR and stricture</span>
+              </div>
+
+              <div class="directive-card">
+                <span class="directive-label">Recommended Active Modality (If No Passage)</span>
+                <span class="directive-val highlight" id="eauModalityText">URS Laser Lithotripsy Preferred</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);" id="eauModalityReason">Distal location has superior stone-free rate with URS (LoE 1a)</span>
+              </div>
+
+              <div class="directive-card">
+                <span class="directive-label">EAU Acute Analgesia Protocol</span>
+                <span class="directive-val" id="eauPainText">NSAIDs First-Line (Diclofenac / Ketorolac)</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);">EAU LoE 1b: Superior pain control and less vomiting than opioids</span>
+              </div>
+
+              <div class="directive-card">
+                <span class="directive-label">Medical Expulsive Therapy (MET) Status</span>
+                <span class="directive-val" id="eauMetStatusText">Tamsulosin 0.4mg Daily Indicated</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);" id="eauMetReasonText">EAU LoE 1a: Facilitates distal ureteral stone transit</span>
+              </div>
+            </div>
+
+            <!-- Structured EAU Step-by-Step Clinical Protocol -->
+            <div>
+              <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.45rem;">
+                Evidence-Based Action Protocol
+              </div>
+              <ul class="eau-plan-list" id="recPlanList">
+                <!-- Dynamically populated -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- Hero Results Split: Probability Gauge + Timeline Summary -->
+          <div class="hero-results-grid">
+            
+            <!-- Circular Gauge -->
+            <div class="gauge-card">
+              <div class="gauge-svg-wrapper">
+                <svg class="gauge-svg" viewBox="0 0 160 160">
+                  <circle class="gauge-circle-bg" cx="80" cy="80" r="70"></circle>
+                  <circle class="gauge-circle-progress" id="gaugeCircle" cx="80" cy="80" r="70"></circle>
+                </svg>
+                <div class="gauge-center-content">
+                  <div class="gauge-percentage">
+                    <span id="probVal">84</span><span class="gauge-percentage-symbol">%</span>
+                  </div>
+                  <div class="gauge-label">Spontaneous Passage</div>
+                </div>
+              </div>
+              <div class="confidence-interval-badge" id="lblConfidenceInterval">95% CI: 79% – 88%</div>
+              <div class="gauge-subtext" id="probSummarySubtext">
+                High probability of spontaneous clearance within the 4-week EAU safety window.
+              </div>
+            </div>
+
+            <!-- Time & Strategic Overview -->
+            <div class="summary-side-card">
+              <div>
+                <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                  Clinical Expulsion Timeline Projection
+                </div>
+                <div class="time-estimate-banner">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                  <span id="recTimeText">Approx. 4 to 9 days to spontaneous expulsion</span>
+                </div>
+              </div>
+
+              <!-- Explainable Multi-Vector Clinical Attribution -->
+              <div style="margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                  <span style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">Clinical Determinant Weights</span>
+                  <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-primary-light);">EAU NOMOGRAM IMPACT</span>
+                </div>
+                <div class="attribution-grid" id="attributionGrid">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Case-Based Reasoning: Top Proximate Historical Cases from 400 Cohort -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span>Case-Based Correlation &bull; Top Historical Patient Matches</span>
+              </h3>
+              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-primary-light); font-weight: 700;" id="lblCohortDbCount">Cohort: 400 cases</span>
+            </div>
+
+            <!-- Matched Cohort Outcome Summary -->
+            <div class="cbr-header-stats">
+              <div class="cbr-stat-block">
+                <div class="cbr-stat-val" id="cbrPassageRate" style="color: var(--color-success);">83%</div>
+                <div class="cbr-stat-lbl">Matched Spontaneous Clearance</div>
+              </div>
+              <div class="cbr-stat-block">
+                <div class="cbr-stat-val" id="cbrAvgDays" style="color: var(--color-primary-light);">7.5 d</div>
+                <div class="cbr-stat-lbl">Mean Expulsion Duration</div>
+              </div>
+              <div class="cbr-stat-block">
+                <div class="cbr-stat-val" id="cbrInterventionRate" style="color: var(--color-danger);">17%</div>
+                <div class="cbr-stat-lbl">Required Intervention (URS/SWL)</div>
+              </div>
+            </div>
+
+            <!-- Patient Cards -->
+            <div class="matches-cards-grid" id="cbrMatchesContainer">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         TAB 2: HISTORICAL COHORT REGISTRY (400 CASES)
+         ============================================== -->
+    <section id="tabRegistry" class="tab-content" role="tabpanel">
+      <!-- Cohort Summary Metric Cards -->
+      <div class="cohort-overview-row">
+        <div class="summary-card">
+          <span class="summary-card-lbl">Total Registered Patients</span>
+          <span class="summary-card-val" id="statTotalCases" style="color: var(--color-primary-light);">400</span>
+        </div>
+        <div class="summary-card">
+          <span class="summary-card-lbl">Spontaneous Expulsion Rate</span>
+          <span class="summary-card-val" id="statPassageRate" style="color: var(--color-success);">61%</span>
+        </div>
+        <div class="summary-card">
+          <span class="summary-card-lbl">Average Calculus Caliber</span>
+          <span class="summary-card-val" id="statAvgSize">5.3 mm</span>
+        </div>
+        <div class="summary-card">
+          <span class="summary-card-lbl">Endourological (URS/SWL) Rate</span>
+          <span class="summary-card-val" id="statUrsRate" style="color: var(--color-warning);">39%</span>
+        </div>
+      </div>
+
+      <!-- Scatter Chart: Size vs HU vs Outcome -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <h3 class="panel-title" style="font-size: 0.95rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            <span>Cohort Distribution: Stone Caliber (mm) vs CT Attenuation (HU)</span>
+          </h3>
+          <div style="display: flex; gap: 1.25rem; font-size: 0.8rem; font-weight: 600; align-items: center;">
+            <span style="display: inline-flex; align-items: center; gap: 6px;">
+              <span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; display: inline-block;"></span> Passed Spontaneously
+            </span>
+            <span style="display: inline-flex; align-items: center; gap: 6px;">
+              <span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444; display: inline-block;"></span> Required Intervention
+            </span>
+            <span style="display: inline-flex; align-items: center; gap: 6px;">
+              <span style="width: 12px; height: 12px; border-radius: 50%; border: 2px solid #38bdf8; display: inline-block;"></span> Active Patient Target
+            </span>
+          </div>
+        </div>
+        <div class="scatter-canvas-wrapper" id="scatterChartWrapper">
+          <svg id="scatterSvg" width="100%" height="280" style="overflow: visible;"></svg>
+        </div>
+      </div>
+
+      <!-- Registry Action Toolbar -->
+      <div class="registry-toolbar">
+        <div class="search-input-wrapper">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="registrySearch" class="search-input" placeholder="Search 400 cases by ID, composition, or notes...">
+        </div>
+
+        <div class="filter-group">
+          <select id="filterLocation" class="filter-select">
+            <option value="all">All Locations</option>
+            <option value="uvj">UVJ</option>
+            <option value="distal">Distal Ureter</option>
+            <option value="mid">Mid Ureter</option>
+            <option value="proximal">Proximal Ureter</option>
+            <option value="puj">PUJ</option>
+          </select>
+
+          <select id="filterOutcome" class="filter-select">
+            <option value="all">All Outcomes</option>
+            <option value="passed">Passed Spontaneously</option>
+            <option value="intervention">Required Intervention</option>
+          </select>
+
+          <button class="btn" id="btnExportCsv" title="Export 400 registry cases as CSV">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Export CSV</span>
+          </button>
+
+          <button class="btn" id="btnImportCsv">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <span>Import CSV</span>
+          </button>
+          <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+
+          <button class="btn btn-primary" id="btnOpenAddPatientModal">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Record Outcome</span>
+          </button>
+
+          <button class="btn" id="btnResetCohort" title="Reset to calibrated 400-patient dataset" style="color: var(--text-muted);">
+            <span>Reset 400</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Data Table (Desktop / Tablet Scrollable) -->
+      <div class="table-responsive">
+        <table class="clinical-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Demographics</th>
+              <th>Calculus Size</th>
+              <th>Location</th>
+              <th>CT HU &amp; Type</th>
+              <th>Hydronephrosis</th>
+              <th>Labs (sCr / TLC)</th>
+              <th>MET</th>
+              <th>Outcome</th>
+              <th>Days</th>
+              <th>Intervention</th>
+              <th>Clinical Follow-Up Notes</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="cohortTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Patient Cards Grid (Visible on phone/touch screens) -->
+      <div class="cohort-mobile-cards" id="cohortMobileCardGrid">
+        <!-- Dynamically populated -->
+      </div>
+    </section>
+
+    <!-- ==============================================
+         TAB 3: EMR CLINICAL CONSULTATION NOTE
+         ============================================== -->
+    <section id="tabReport" class="tab-content" role="tabpanel">
+      <div class="report-container">
+        
+        <div class="report-header-banner">
+          <div>
+            <div class="report-institution-line">
+              <span class="report-institution-badge">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                AIN SHAMS UNIVERSITY HOSPITALS
+              </span>
+              <span class="report-dept-badge">FACULTY OF MEDICINE &bull; DEPARTMENT OF UROLOGY</span>
+            </div>
+            <h2 class="report-doc-title">Urology Consultation &amp; Calculus Passage Assessment</h2>
+            <div class="report-doc-sub">Strict EAU Guidelines on Urolithiasis Protocol &bull; Calibrated with 400-Patient Registry</div>
+          </div>
+          <div style="text-align: right; font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-primary-light);">
+            <div>DATE: <span id="reportDate"></span></div>
+            <div>PROTOCOL: EAU GUIDELINES VERIFIED</div>
+            <div style="color: var(--text-muted); font-size: 0.72rem; margin-top: 2px;">ASU-URO-REGISTRY #400</div>
+          </div>
+        </div>
+
+        <!-- Section 1: Demographics & Clinical Presentation -->
+        <div class="report-section">
+          <div class="report-sec-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span>1. Clinical Presentation &amp; Stone Profiling</span>
+          </div>
+          <div class="report-grid-kv">
+            <div class="report-kv-box">
+              <div class="report-kv-label">Stone Dimensions</div>
+              <div class="report-kv-value" id="repStoneSize">4.5 mm</div>
+            </div>
+            <div class="report-kv-box">
+              <div class="report-kv-label">Anatomical Location</div>
+              <div class="report-kv-value" id="repLocation">UVJ (Ureterovesical Junction)</div>
+            </div>
+            <div class="report-kv-box">
+              <div class="report-kv-label">CT HU &amp; Presumed Composition</div>
+              <div class="report-kv-value" id="repDensity">750 HU (Struvite / Oxalate)</div>
+            </div>
+            <div class="report-kv-box">
+              <div class="report-kv-label">Degree of Hydronephrosis</div>
+              <div class="report-kv-value" id="repHydronephrosis">Mild</div>
+            </div>
+            <div class="report-kv-box">
+              <div class="report-kv-label">Colic Duration / Pain VAS</div>
+              <div class="report-kv-value" id="repSymptoms">3 days (Pain 6/10)</div>
+            </div>
+            <div class="report-kv-box">
+              <div class="report-kv-label">SIRS / Infection Status</div>
+              <div class="report-kv-value" id="repInfection">Afebrile (No sepsis criteria)</div>
+            </div>
+            <div class="report-kv-box">
+              <div class="report-kv-label">Serum Creatinine</div>
+              <div class="report-kv-value" id="repSerumCreatinine">1.00 mg/dL &mdash; Normal</div>
+            </div>
+            <div class="report-kv-box">
+              <div class="report-kv-label">Total Leukocyte Count (TLC)</div>
+              <div class="report-kv-value" id="repTlcCount">8.0 &times; 10&sup3;/&micro;L &mdash; Normal</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: AI Predictive Analysis & 400 Cohort Matching -->
+        <div class="report-section">
+          <div class="report-sec-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+            <span>2. Spontaneous Passage Prediction &amp; 400-Patient Cohort Analysis</span>
+          </div>
+          <div class="report-text-block" id="repAiAnalysisText">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Section 3: Recommended Management Plan (EAU Aligned) -->
+        <div class="report-section">
+          <div class="report-sec-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span>3. EAU Clinical Guideline Mandate &amp; Protocol</span>
+          </div>
+          <div class="report-text-block" id="repManagementPlanText">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="report-action-bar">
+          <button class="btn" id="btnShareNote" title="Share Consultation Note via WhatsApp, Email, or Messaging">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            <span>Share Note</span>
+          </button>
+          <button class="btn" id="btnCopyNote">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span>Copy Text to Clipboard</span>
+          </button>
+          <button class="btn btn-primary" id="btnPrintNote">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <span>Print / Save PDF</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Application Footer / Academic Attribution -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div class="footer-affiliation">
+        <div class="footer-asu-shield">ASU</div>
+        <div>
+          <div class="footer-uni-title">AIN SHAMS UNIVERSITY &bull; FACULTY OF MEDICINE</div>
+          <div class="footer-dept-title">Department of Urology &bull; Endourology &amp; Calculus Clinical Research Unit &bull; Cairo, Egypt</div>
+        </div>
+      </div>
+      <div class="footer-protocol-info">
+        <span class="footer-meta-pill">EAU Guidelines Compliant</span>
+        <span class="footer-meta-pill">400-Patient Validated Registry</span>
+        <span class="footer-meta-pill">Clinical Decision Support System (CDSS)</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==============================================
+       MODAL 1: RECORD COMPLETED PATIENT OUTCOME
+       ============================================== -->
+  <div class="modal-backdrop" id="addPatientModal" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="panel-title" style="font-size: 1.05rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+          <span>Record Completed Patient Outcome (400 Cohort)</span>
+        </h3>
+        <button class="btn-icon" id="btnCloseModal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="addPatientForm">
+        <div class="modal-form-grid">
+          <div>
+            <label class="form-label">Patient / Case ID</label>
+            <input type="text" id="mPtId" class="modal-input" placeholder="e.g. PT-1401" required>
+          </div>
+          <div>
+            <label class="form-label">Age &amp; Sex</label>
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="number" id="mPtAge" class="modal-input" placeholder="Age" min="1" max="110" value="48" required>
+              <select id="mPtSex" class="modal-input" style="width: 80px;">
+                <option value="M">M</option>
+                <option value="F">F</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Calculus Caliber (mm)</label>
+            <input type="number" id="mStoneSize" class="modal-input" step="0.1" min="1" max="25" value="5.2" required>
+          </div>
+          <div>
+            <label class="form-label">Calculus Location</label>
+            <select id="mLocation" class="modal-input">
+              <option value="uvj">UVJ (Terminal Junction)</option>
+              <option value="distal" selected>Distal Ureter</option>
+              <option value="mid">Mid Ureter</option>
+              <option value="proximal">Proximal Ureter</option>
+              <option value="puj">PUJ</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">CT HU Value</label>
+            <input type="number" id="mHuValue" class="modal-input" min="100" max="2000" value="820" required>
+          </div>
+          <div>
+            <label class="form-label">Hydronephrosis Grade</label>
+            <select id="mHydronephrosis" class="modal-input">
+              <option value="none">None</option>
+              <option value="mild" selected>Mild</option>
+              <option value="moderate">Moderate</option>
+              <option value="severe">Severe</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Serum Creatinine (mg/dL)</label>
+            <input type="number" id="mSerumCreatinine" class="modal-input" step="0.01" min="0.3" max="15.0" value="1.00" placeholder="sCr mg/dL">
+          </div>
+          <div>
+            <label class="form-label">Total Leukocyte Count (TLC)</label>
+            <input type="number" id="mTlcCount" class="modal-input" step="0.1" min="2.0" max="45.0" value="8.0" placeholder="TLC × 10³/μL">
+          </div>
+          <div>
+            <label class="form-label">Pain VAS (1-10)</label>
+            <input type="number" id="mPainVas" class="modal-input" min="1" max="10" value="7">
+          </div>
+          <div>
+            <label class="form-label">Colic Duration (Days)</label>
+            <input type="number" id="mDuration" class="modal-input" min="1" max="90" value="4">
+          </div>
+          <div>
+            <label class="form-label">Clinical Outcome</label>
+            <select id="mOutcome" class="modal-input">
+              <option value="passed">Passed Spontaneously</option>
+              <option value="intervention">Required Intervention</option>
+            </select>
+          </div>
+          <div id="mDaysToPassageGroup">
+            <label class="form-label">Days to Expulsion</label>
+            <input type="number" id="mDaysToPassage" class="modal-input" min="1" max="60" value="9" placeholder="Leave empty if intervened">
+          </div>
+          <div>
+            <label class="form-label">Intervention Modality</label>
+            <select id="mInterventionType" class="modal-input">
+              <option value="none">None (Spontaneous)</option>
+              <option value="urs">Ureteroscopy (URS / Laser)</option>
+              <option value="swl">Shockwave Lithotripsy (SWL)</option>
+              <option value="urgent_stent_urs">Urgent Stent / Nephrostomy</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">MET Administered?</label>
+            <select id="mMet" class="modal-input">
+              <option value="true">Yes (Tamsulosin / Silodosin)</option>
+              <option value="false">No MET</option>
+            </select>
+          </div>
+          <div class="modal-form-full">
+            <label class="form-label">Clinical Follow-Up Notes</label>
+            <input type="text" id="mNotes" class="modal-input" placeholder="Clinical follow-up notes, complications, stone analysis...">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem;">
+          <button type="button" class="btn" id="btnCancelModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save to 400 Registry</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==============================================
+       MODAL 2: THE EAU CLINICAL GUIDELINES REFERENCE GUIDE
+       ============================================== -->
+  <div class="modal-backdrop" id="eauRefModal" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-dialog-large">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <div style="width: 32px; height: 32px; border-radius: 6px; background: #2563eb; display: flex; align-items: center; justify-content: center; color: white;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          </div>
+          <div>
+            <h3 class="panel-title" style="font-size: 1.15rem; color: var(--text-primary);">EAU Guidelines on Urolithiasis &bull; Clinical Reference Compendium</h3>
+            <span style="font-size: 0.76rem; color: var(--text-secondary);">European Association of Urology Guidelines Office &bull; Decision Rules &amp; Evidence Levels</span>
+          </div>
+        </div>
+        <button class="btn-icon" id="btnCloseRefModal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="eau-ref-content">
+        <!-- Section 1: Emergency Drainage -->
+        <div class="eau-ref-card eau-ref-card-danger">
+          <div class="eau-ref-title">
+            <span>1. Emergency Decompression in Sepsis &amp; Solitary Kidney (EAU § 3.2.3)</span>
+            <span class="eau-evidence-tag">LoE 1b &bull; Strong Recommendation</span>
+          </div>
+          <p>For patients with <strong>sepsis, fever (>38°C), systemic inflammatory response (SIRS)</strong>, or infected obstructed hydronephrosis, urgent decompression of the collecting system is mandatory.</p>
+          <ul style="padding-left: 1.25rem; margin-top: 0.35rem;">
+            <li><strong>Decompression Modality:</strong> Urgent placement of a Retrograde Double-J Stent or Percutaneous Nephrostomy (PCN) combined with immediate broad-spectrum intravenous antimicrobials.</li>
+            <li><strong>Contraindication:</strong> Definitive stone fragmentation (URS / SWL) is strictly contraindicated during active acute infection.</li>
+            <li><strong>Solitary Kidney:</strong> An obstructed solitary kidney with rising creatinine requires urgent decompression to avert irreversible anuric acute renal injury.</li>
+          </ul>
+        </div>
+
+        <!-- Section 2: Spontaneous Passage Rates -->
+        <div class="eau-ref-card">
+          <div class="eau-ref-title">
+            <span>2. Spontaneous Passage Rates by Size &amp; Anatomical Location (EAU § 3.4.1)</span>
+            <span class="eau-evidence-tag">LoE 1a &bull; Meta-Analysis</span>
+          </div>
+          <table class="eau-table-mini">
+            <thead>
+              <tr>
+                <th>Calculus Caliber</th>
+                <th>Overall Passage Rate</th>
+                <th>Distal / UVJ Rate</th>
+                <th>Proximal / Upper Rate</th>
+                <th>EAU Recommendation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>≤ 4.0 mm</strong></td>
+                <td>~85% – 95%</td>
+                <td>~95%</td>
+                <td>~65%</td>
+                <td>Observation first-line; routine MET not required (LoE 1a)</td>
+              </tr>
+              <tr>
+                <td><strong>4.0 – 6.0 mm</strong></td>
+                <td>~50% – 65%</td>
+                <td>~70%</td>
+                <td>~45%</td>
+                <td>Trial of MET strongly recommended for distal stones (LoE 1a)</td>
+              </tr>
+              <tr>
+                <td><strong>6.0 – 8.0 mm</strong></td>
+                <td>~25% – 40%</td>
+                <td>~45%</td>
+                <td>~20%</td>
+                <td>Limited trial (max 2 weeks) or early active stone removal</td>
+              </tr>
+              <tr>
+                <td><strong>> 8.0 mm</strong></td>
+                <td>< 15% – 20%</td>
+                <td>< 25%</td>
+                <td>< 10%</td>
+                <td>Primary active stone removal indicated (URS / SWL)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Section 3: Medical Expulsive Therapy (MET) -->
+        <div class="eau-ref-card eau-ref-card-success">
+          <div class="eau-ref-title">
+            <span>3. Medical Expulsive Therapy (MET) Protocol (EAU § 3.4.3)</span>
+            <span class="eau-evidence-tag">LoE 1a &bull; Strong Recommendation</span>
+          </div>
+          <p><strong>Offer alpha-blockers as Medical Expulsive Therapy (MET)</strong> for patients with distal ureteral stones > 5 mm (or 4–7 mm) who are candidates for conservative therapy.</p>
+          <ul style="padding-left: 1.25rem; margin-top: 0.35rem;">
+            <li><strong>First-Line Posology:</strong> Tamsulosin 0.4 mg PO once daily (or Silodosin 8 mg daily).</li>
+            <li><strong>Documented Benefits:</strong> Significantly higher stone expulsion rates, reduced time to expulsion, decreased colic episodes, and reduced analgesic consumption.</li>
+            <li><strong>Patient Counseling:</strong> Counsel patients regarding potential side effects including retrograde ejaculation, orthostatic hypotension, and nasal congestion.</li>
+            <li><strong>Stones < 4mm:</strong> Routine MET is not indicated for stones < 4 mm due to absence of demonstrable clinical superiority over placebo.</li>
+          </ul>
+        </div>
+
+        <!-- Section 4: 4-Week Surveillance Safety Ceiling -->
+        <div class="eau-ref-card eau-ref-card-warning">
+          <div class="eau-ref-title">
+            <span>4. The 4-Week Surveillance Ceiling &amp; Nephron Protection (EAU § 3.4.1)</span>
+            <span class="eau-evidence-tag">EAU Clinical Safety Mandate</span>
+          </div>
+          <p><strong>A trial of conservative observation must NOT exceed 4 to 6 weeks.</strong></p>
+          <ul style="padding-left: 1.25rem; margin-top: 0.35rem;">
+            <li>Observation with periodic imaging is appropriate only while pain is controlled, with no signs of sepsis, and preserved renal function.</li>
+            <li><strong>Renal Damage Risk:</strong> Persistent complete or high-grade ureteral obstruction exceeding 4 to 6 weeks causes progressive and irreversible reduction in glomerular filtration rate (nephron loss) and stricture formation.</li>
+            <li><strong>Periodic Imaging:</strong> Serial ultrasound or low-dose non-contrast CT must be performed at 2 to 4 weeks if the calculus has not been retrieved.</li>
+          </ul>
+        </div>
+
+        <!-- Section 5: Modality Selection: URS vs SWL -->
+        <div class="eau-ref-card">
+          <div class="eau-ref-title">
+            <span>5. Active Stone Removal Modality Selection: URS vs SWL (EAU § 3.4.4)</span>
+            <span class="eau-evidence-tag">LoE 1a &bull; Strong Recommendation</span>
+          </div>
+          <ul style="padding-left: 1.25rem; margin-top: 0.35rem;">
+            <li><strong>Distal Ureter:</strong> Ureteroscopy (URS / semi-rigid laser lithotripsy) is the preferred treatment (superior stone-free rate in a single procedure compared to SWL, LoE 1a).</li>
+            <li><strong>Mid &amp; Proximal Ureter:</strong>
+              <ul style="padding-left: 1.25rem; margin-top: 0.2rem;">
+                <li>If Stone &lt; 10 mm and <strong>CT Attenuation &lt; 1000 HU:</strong> SWL and URS are both valid first-line options. SWL is non-invasive; URS offers faster clearance.</li>
+                <li>If Stone &gt; 10 mm OR <strong>CT Attenuation &ge; 1000 HU (Brushite, COM):</strong> URS (flexible RIRS with Holmium/Thulium laser) is strongly preferred over SWL due to high stone density and shockwave resistance.</li>
+              </ul>
+            </li>
+            <li><strong>Analgesia:</strong> EAU § 3.1.2: First-line analgesia is NSAIDs (Diclofenac 50mg, Ibuprofen 400mg, Ketorolac, or Metamizole) with superior pain reduction and fewer adverse effects compared to opioids (LoE 1b, Strong).</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
+        <button type="button" class="btn btn-primary" id="btnCloseRefModalBtn">Close Reference</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================
+       MOBILE CONNECT MODAL (QR CODE & WI-FI ACCESS)
+       ============================================== -->
+  <div class="modal-backdrop" id="mobileConnectModal" role="dialog" aria-modal="true">
+    <div class="modal-dialog" style="max-width: 580px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background: linear-gradient(135deg, #0284c7, #2563eb); display: flex; align-items: center; justify-content: center; color: white;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="2" width="14" height="20" rx="3" ry="3"></rect><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="3"></line></svg>
+          </div>
+          <div>
+            <h3 class="panel-title" style="font-size: 1.05rem;">Open UroStone AI on Your Phone</h3>
+            <div style="font-size: 0.74rem; color: var(--text-secondary);">Ain Shams University &bull; EAU Clinical Calculus Mobile Access</div>
+          </div>
+        </div>
+        <button class="btn-icon" id="btnCloseMobileModal" title="Close Modal">&times;</button>
+      </div>
+
+      <div class="modal-mobile-content">
+        <!-- QR Code Stage -->
+        <div class="mobile-qr-stage">
+          <div id="mobileQrCodeBox" class="mobile-qr-box">
+            <!-- Dynamically generated offline SVG QR code -->
+          </div>
+          <div class="mobile-lan-status" id="mobileLanStatusContainer">
+            <span class="telemetry-dot" id="serverTelemetryDot"></span>
+            <span id="lblServerStatusText">Checking Wi-Fi LAN Server...</span>
+          </div>
+        </div>
+
+        <!-- Network URL Box -->
+        <div class="mobile-network-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <span style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">Phone Access URL (Local Wi-Fi)</span>
+            <span id="lblServerLanStatus" style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-warning); font-weight: 700;">CHECKING...</span>
+          </div>
+          <div class="url-input-container">
+            <input type="text" id="mobileLanUrlInput" class="modal-input mono-font" value="http://192.168.1.14:8080" style="font-weight: 600; color: var(--color-primary-light);">
+            <button type="button" class="btn btn-primary" id="btnCopyLanUrl">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span>Copy Link</span>
+            </button>
+          </div>
+          <!-- Network Adapter Selector (if multiple detected) -->
+          <div id="adapterSelectorRow" style="margin-top: 0.65rem; display: none;">
+            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Switch Network Adapter / Wi-Fi IP:</div>
+            <select id="selNetworkAdapter" class="modal-input" style="font-size: 0.78rem; padding: 0.35rem 0.5rem; width: 100%; border-radius: 6px;">
+            </select>
+          </div>
+        </div>
+
+        <!-- Server Control & Troubleshooting Bar -->
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" class="btn btn-outline" id="btnRefreshServerStatus" style="flex: 1; font-size: 0.78rem; padding: 0.45rem 0.75rem; justify-content: center;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            <span>Test / Refresh Server</span>
+          </button>
+          <button type="button" class="btn btn-outline" id="btnFirewallHelp" style="font-size: 0.78rem; padding: 0.45rem 0.75rem; justify-content: center;" title="If phone cannot reach server, run Fix_Firewall_Access.bat">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>Firewall Fix</span>
+          </button>
+        </div>
+
+        <!-- 3-Step Setup Instructions -->
+        <div class="mobile-steps-list">
+          <div class="step-card">
+            <div class="step-badge">1</div>
+            <div class="step-text">
+              <strong>Connect to Same Wi-Fi:</strong> Ensure your phone (iPhone or Android) is connected to the same Wi-Fi as this PC.
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-badge">2</div>
+            <div class="step-text">
+              <strong>Scan with Phone Camera:</strong> Point your iPhone Camera or Android Camera at the QR code above and tap the link banner.
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-badge">3</div>
+            <div class="step-text">
+              <strong>Install as Fullscreen App:</strong>
+              <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                <div>&bull; <strong>iPhone (Safari):</strong> Tap <strong>Share</strong> (box with arrow) &rarr; <strong>"Add to Home Screen"</strong></div>
+                <div>&bull; <strong>Android (Chrome):</strong> Tap <strong>Menu (&vellip;)</strong> &rarr; <strong>"Add to Home screen" / "Install app"</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Offline PWA Feature Banner -->
+        <div class="offline-feature-banner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: var(--color-success);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <span><strong>100% Offline Capable:</strong> Once loaded, the PWA stays cached on your phone, functioning anywhere in hospital wards or OR suites with zero internet connection.</span>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem;">
+        <button type="button" class="btn" id="btnLaunchServerTip" title="Start mobile server in console window">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span>Launch_Mobile_Server.bat</span>
+        </button>
+        <button type="button" class="btn btn-primary" id="btnCloseMobileModalBtn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================
+       NATIVE MOBILE BOTTOM NAVIGATION DOCK
+       ============================================== -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Bottom Navigation">
+    <button type="button" class="mobile-nav-item active" data-target="tabPredictor">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+      <span>Predictor</span>
+    </button>
+    <button type="button" class="mobile-nav-item" id="btnMobileEauDirective" data-target="tabPredictor" data-scroll="eauDecisionCard">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+      <span>EAU Directives</span>
+    </button>
+    <button type="button" class="mobile-nav-item" data-target="tabRegistry">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path></svg>
+      <span>Cohort 400</span>
+    </button>
+    <button type="button" class="mobile-nav-item" data-target="tabReport">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+      <span>EMR Note</span>
+    </button>
+  </nav>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Logic Scripts -->
+  <script src="js/qrcode.js"></script>
+  <script src="js/sampleData.js"></script>
+  <script src="js/app.bundle.js"></script>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js').then(function(reg) {
+          console.log('[UroStone AI] PWA Service Worker active:', reg.scope);
+        }).catch(function(err) {
+          console.warn('[UroStone AI] Service Worker registration failed:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
