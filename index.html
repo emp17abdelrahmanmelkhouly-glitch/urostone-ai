@@ -555,7 +555,7 @@
               <div class="lab-input-header">
                 <div>
                   <div class="toggle-title">Serum Creatinine (sCr)</div>
-                  <div class="toggle-desc">Normal: M &lt;1.2 / F &lt;1.0 mg/dL &bull; &gt;1.5 in solitary kidney = AKI risk</div>
+                  <div class="toggle-desc">Normal: M &le;1.20 / F &le;1.00 mg/dL &bull; Elevated: M &ge;1.40 / F &ge;1.20 mg/dL (Post-Renal AKI &bull; Decompression Mandated)</div>
                 </div>
                 <div class="lab-value-badge">
                   <span id="lblSerumCreatinine" style="font-family: var(--font-mono); font-weight: 700; color: var(--color-primary-light);">1.00 mg/dL</span>
@@ -698,6 +698,133 @@
               <ul class="eau-plan-list" id="recPlanList">
                 <!-- Dynamically populated -->
               </ul>
+            </div>
+
+            <!-- EAU MULTI-PARAMETRIC INPUT CORRELATION & TREATMENT JUSTIFICATION MATRIX -->
+            <div class="eau-justification-card" id="eauJustificationCard">
+              <div class="justification-header">
+                <div class="justification-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                  </svg>
+                  <span>EAU Multi-Parametric Input Correlation &amp; Treatment Rationale</span>
+                </div>
+                <span class="justification-badge" id="lblJustificationSummary">EAU-Aligned Rationale</span>
+              </div>
+              <p class="justification-intro">
+                Every clinical parameter entered is correlated with EAU Guidelines below to explicitly justify why this specific treatment pathway was selected:
+              </p>
+
+              <div class="justification-grid">
+                <!-- 1. Creatinine & Renal Status -->
+                <div class="justification-item" id="jItemCreatinine">
+                  <div class="j-item-header">
+                    <div class="j-item-header-left">
+                      <span class="j-icon">🧪</span>
+                      <span class="j-label">Serum Creatinine &amp; Renal Filtration Status</span>
+                    </div>
+                    <span class="j-tag" id="jTagCreatinine">sCr 1.00 mg/dL (Normal)</span>
+                  </div>
+                  <div class="j-item-body" id="jBodyCreatinine"></div>
+                </div>
+
+                <!-- 2. Infection, Fever & TLC Sepsis Risk -->
+                <div class="justification-item" id="jItemInfection">
+                  <div class="j-item-header">
+                    <div class="j-item-header-left">
+                      <span class="j-icon">🌡️</span>
+                      <span class="j-label">Infection, SIRS &amp; Leukocytosis Status</span>
+                    </div>
+                    <span class="j-tag" id="jTagInfection">Afebrile (No Sepsis)</span>
+                  </div>
+                  <div class="j-item-body" id="jBodyInfection"></div>
+                </div>
+
+                <!-- 3. Stone Caliber & Anatomical Site -->
+                <div class="justification-item" id="jItemStone">
+                  <div class="j-item-header">
+                    <div class="j-item-header-left">
+                      <span class="j-icon">📏</span>
+                      <span class="j-label">Stone Dimensions &amp; Anatomical Transit Feasibility</span>
+                    </div>
+                    <span class="j-tag" id="jTagStone">4.5 mm Distal</span>
+                  </div>
+                  <div class="j-item-body" id="jBodyStone"></div>
+                </div>
+
+                <!-- 4. CT HU Attenuation & Shockwave Feasibility -->
+                <div class="justification-item" id="jItemDensity">
+                  <div class="j-item-header">
+                    <div class="j-item-header-left">
+                      <span class="j-icon">🔬</span>
+                      <span class="j-label">CT HU Attenuation &amp; ESWL vs Laser Lithotripsy</span>
+                    </div>
+                    <span class="j-tag" id="jTagDensity">750 HU</span>
+                  </div>
+                  <div class="j-item-body" id="jBodyDensity"></div>
+                </div>
+
+                <!-- 5. Hydronephrosis & Ureteral Backpressure -->
+                <div class="justification-item" id="jItemHydronephrosis">
+                  <div class="j-item-header">
+                    <div class="j-item-header-left">
+                      <span class="j-icon">🌊</span>
+                      <span class="j-label">Hydronephrosis &amp; Ureteral Backpressure</span>
+                    </div>
+                    <span class="j-tag" id="jTagHydronephrosis">Mild Backpressure</span>
+                  </div>
+                  <div class="j-item-body" id="jBodyHydronephrosis"></div>
+                </div>
+
+                <!-- 6. Colic Duration & Pain VAS Severity -->
+                <div class="justification-item" id="jItemSymptoms">
+                  <div class="j-item-header">
+                    <div class="j-item-header-left">
+                      <span class="j-icon">⏱️</span>
+                      <span class="j-label">Colic Duration &amp; Pain Intractability</span>
+                    </div>
+                    <span class="j-tag" id="jTagSymptoms">Acute / Controlled</span>
+                  </div>
+                  <div class="j-item-body" id="jBodySymptoms"></div>
+                </div>
+
+                <!-- 7. Pharmacotherapy: MET & Analgesia Safety Protocol -->
+                <div class="justification-item" id="jItemMedication">
+                  <div class="j-item-header">
+                    <div class="j-item-header-left">
+                      <span class="j-icon">💊</span>
+                      <span class="j-label">Medical Expulsive Therapy (MET) &amp; Analgesia Safety</span>
+                    </div>
+                    <span class="j-tag" id="jTagMedication">Pharmacotherapy Protocol</span>
+                  </div>
+                  <div class="j-item-body" id="jBodyMedication"></div>
+                </div>
+
+                <!-- 8. Procedural Staging & Stenting Rationale -->
+                <div class="justification-item" id="jItemStaging">
+                  <div class="j-item-header">
+                    <div class="j-item-header-left">
+                      <span class="j-icon">⚡</span>
+                      <span class="j-label">Surgical Staging &amp; Double-J / PCN Drainage Mandate</span>
+                    </div>
+                    <span class="j-tag" id="jTagStaging">Single-Stage Primary</span>
+                  </div>
+                  <div class="j-item-body" id="jBodyStaging"></div>
+                </div>
+              </div>
+
+              <!-- Dedicated Clinical Synthesis Box: Why Is This The Treatment Choice? -->
+              <div class="justification-item alert-accent" id="jItemSummary" style="margin-top: 0.85rem;">
+                <div class="j-item-header">
+                  <div class="j-item-header-left">
+                    <span class="j-icon">🎯</span>
+                    <span class="j-label" style="font-weight: 700; color: var(--color-primary-light);">SYNTHESIS: Why Is This the Guideline Treatment Choice?</span>
+                  </div>
+                  <span class="j-tag" id="jTagSummary">EAU Clinical Decision Matrix</span>
+                </div>
+                <div class="j-item-body" id="jBodySummary" style="font-size: 0.82rem; line-height: 1.55; color: var(--text-primary); margin-top: 0.35rem;"></div>
+              </div>
             </div>
           </div>
 

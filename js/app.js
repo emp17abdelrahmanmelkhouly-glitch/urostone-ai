@@ -128,6 +128,37 @@ const elements = {
   colDefinitiveBody: document.getElementById("colDefinitiveBody"),
   pathwayPearlBox: document.getElementById("pathwayPearlBox"),
 
+  // EAU Input Correlation & Justification Card
+  eauJustificationCard: document.getElementById("eauJustificationCard"),
+  lblJustificationSummary: document.getElementById("lblJustificationSummary"),
+  jItemCreatinine: document.getElementById("jItemCreatinine"),
+  jTagCreatinine: document.getElementById("jTagCreatinine"),
+  jBodyCreatinine: document.getElementById("jBodyCreatinine"),
+  jItemInfection: document.getElementById("jItemInfection"),
+  jTagInfection: document.getElementById("jTagInfection"),
+  jBodyInfection: document.getElementById("jBodyInfection"),
+  jItemStone: document.getElementById("jItemStone"),
+  jTagStone: document.getElementById("jTagStone"),
+  jBodyStone: document.getElementById("jBodyStone"),
+  jItemDensity: document.getElementById("jItemDensity"),
+  jTagDensity: document.getElementById("jTagDensity"),
+  jBodyDensity: document.getElementById("jBodyDensity"),
+  jItemStaging: document.getElementById("jItemStaging"),
+  jTagStaging: document.getElementById("jTagStaging"),
+  jBodyStaging: document.getElementById("jBodyStaging"),
+  jItemHydronephrosis: document.getElementById("jItemHydronephrosis"),
+  jTagHydronephrosis: document.getElementById("jTagHydronephrosis"),
+  jBodyHydronephrosis: document.getElementById("jBodyHydronephrosis"),
+  jItemSymptoms: document.getElementById("jItemSymptoms"),
+  jTagSymptoms: document.getElementById("jTagSymptoms"),
+  jBodySymptoms: document.getElementById("jBodySymptoms"),
+  jItemMedication: document.getElementById("jItemMedication"),
+  jTagMedication: document.getElementById("jTagMedication"),
+  jBodyMedication: document.getElementById("jBodyMedication"),
+  jItemSummary: document.getElementById("jItemSummary"),
+  jTagSummary: document.getElementById("jTagSummary"),
+  jBodySummary: document.getElementById("jBodySummary"),
+
   // Mobile Sticky Outcome Bar
   mobileStickySummary: document.getElementById("mobileStickySummary"),
   mobileProbVal: document.getElementById("mobileProbVal"),
@@ -896,6 +927,26 @@ function renderPredictionHero(pred) {
     if (elements.pathwayPearlBox) elements.pathwayPearlBox.innerHTML = sp.pearlHtml;
   }
 
+  // Render EAU Multi-Parametric Input Correlation & Treatment Justification Card
+  if (pred.inputJustifications && elements.eauJustificationCard) {
+    const j = pred.inputJustifications;
+    const setJItem = (itemEl, tagEl, bodyEl, data) => {
+      if (!itemEl || !data) return;
+      itemEl.className = `justification-item alert-${data.alertLevel || "success"}`;
+      if (tagEl) tagEl.textContent = data.statusTag || "";
+      if (bodyEl) bodyEl.innerHTML = data.rationaleHtml || "";
+    };
+    setJItem(elements.jItemCreatinine, elements.jTagCreatinine, elements.jBodyCreatinine, j.renal);
+    setJItem(elements.jItemInfection, elements.jTagInfection, elements.jBodyInfection, j.infection);
+    setJItem(elements.jItemStone, elements.jTagStone, elements.jBodyStone, j.stone);
+    setJItem(elements.jItemDensity, elements.jTagDensity, elements.jBodyDensity, j.density);
+    setJItem(elements.jItemHydronephrosis, elements.jTagHydronephrosis, elements.jBodyHydronephrosis, j.hydronephrosis);
+    setJItem(elements.jItemSymptoms, elements.jTagSymptoms, elements.jBodySymptoms, j.symptoms);
+    setJItem(elements.jItemMedication, elements.jTagMedication, elements.jBodyMedication, j.medication);
+    setJItem(elements.jItemStaging, elements.jTagStaging, elements.jBodyStaging, j.staging);
+    setJItem(elements.jItemSummary, elements.jTagSummary, elements.jBodySummary, j.treatmentChoiceSummary);
+  }
+
   // Structured Action Plan List
   elements.recPlanList.innerHTML = pred.clinicalActionPlan
     .map(step => `
@@ -1201,12 +1252,13 @@ function renderReportView() {
 
   // Management Plan Text
   const sp = pred.surgicalPathway;
+  const j = pred.inputJustifications;
   elements.repManagementPlanText.innerHTML = `
     <p><strong>Clinical Stratification:</strong> ${pred.actionTitle}</p>
     <p><strong>Estimated Passage Timeline:</strong> ${pred.timePassageSummary}</p>
     ${sp ? `
       <div style="margin: 0.65rem 0; padding: 0.65rem 0.85rem; border-radius: 6px; background: rgba(15, 23, 42, 0.45); border: 1px solid var(--border-color);">
-        <div style="font-size: 0.78rem; font-weight: 700; color: ${pred.isEmergency ? 'var(--status-danger)' : 'var(--accent-sky)'}; text-transform: uppercase;">
+        <div style="font-size: 0.78rem; font-weight: 700; color: ${pred.isEmergency || sp.strategyType === 'urgent_renal_relief' ? 'var(--status-danger)' : 'var(--accent-sky)'}; text-transform: uppercase;">
           SURGICAL STAGING &amp; PROCEDURAL PATHWAY: ${sp.strategyBadge}
         </div>
         <div style="font-size: 0.82rem; margin-top: 0.25rem;">
@@ -1217,6 +1269,40 @@ function renderReportView() {
         </div>
         <div style="font-size: 0.80rem; margin-top: 0.25rem; color: var(--text-muted);">
           <strong>Definitive Modality Selection:</strong> ${sp.colDefinitiveTitle}
+        </div>
+      </div>
+    ` : ""}
+    ${j ? `
+      <div style="margin: 0.65rem 0; padding: 0.65rem 0.85rem; border-radius: 6px; background: rgba(15, 23, 42, 0.3); border: 1px solid var(--border-color);">
+        <div style="font-size: 0.76rem; font-weight: 700; color: var(--accent-sky); text-transform: uppercase; margin-bottom: 0.35rem;">
+          EAU Multi-Parametric Input Correlation Rationale:
+        </div>
+        <div style="font-size: 0.78rem; line-height: 1.45; margin-bottom: 0.3rem;">
+          <strong>Renal Function (sCr):</strong> ${j.renal.statusTag} — ${j.renal.rationaleHtml.replace(/<[^>]+>/g, '')}
+        </div>
+        <div style="font-size: 0.78rem; line-height: 1.45; margin-bottom: 0.3rem;">
+          <strong>Infection Status (TLC/Fever):</strong> ${j.infection.statusTag} — ${j.infection.rationaleHtml.replace(/<[^>]+>/g, '')}
+        </div>
+        <div style="font-size: 0.78rem; line-height: 1.45; margin-bottom: 0.3rem;">
+          <strong>Calculus Caliber & Site:</strong> ${j.stone.statusTag} — ${j.stone.rationaleHtml.replace(/<[^>]+>/g, '')}
+        </div>
+        <div style="font-size: 0.78rem; line-height: 1.45; margin-bottom: 0.3rem;">
+          <strong>CT Attenuation (HU):</strong> ${j.density.statusTag} — ${j.density.rationaleHtml.replace(/<[^>]+>/g, '')}
+        </div>
+        <div style="font-size: 0.78rem; line-height: 1.45; margin-bottom: 0.3rem;">
+          <strong>Hydronephrosis Grade:</strong> ${j.hydronephrosis ? j.hydronephrosis.statusTag + ' — ' + j.hydronephrosis.rationaleHtml.replace(/<[^>]+>/g, '') : 'Evaluated'}
+        </div>
+        <div style="font-size: 0.78rem; line-height: 1.45; margin-bottom: 0.3rem;">
+          <strong>Colic Duration & Pain:</strong> ${j.symptoms ? j.symptoms.statusTag + ' — ' + j.symptoms.rationaleHtml.replace(/<[^>]+>/g, '') : 'Evaluated'}
+        </div>
+        <div style="font-size: 0.78rem; line-height: 1.45; margin-bottom: 0.3rem;">
+          <strong>Pharmacotherapy (MET & Analgesia):</strong> ${j.medication ? j.medication.statusTag + ' — ' + j.medication.rationaleHtml.replace(/<[^>]+>/g, '') : 'Evaluated'}
+        </div>
+        <div style="font-size: 0.78rem; line-height: 1.45; margin-bottom: 0.3rem;">
+          <strong>Staging & Stenting Directive:</strong> ${j.staging.statusTag} — ${j.staging.rationaleHtml.replace(/<[^>]+>/g, '')}
+        </div>
+        <div style="font-size: 0.80rem; line-height: 1.45; margin-top: 0.45rem; padding-top: 0.4rem; border-top: 1px dashed var(--border-color); color: var(--accent-sky);">
+          <strong>Why This Treatment Choice?</strong> ${j.treatmentChoiceSummary ? j.treatmentChoiceSummary.rationaleHtml.replace(/<[^>]+>/g, '') : ''}
         </div>
       </div>
     ` : ""}
@@ -1233,6 +1319,14 @@ function copyConsultationNoteToClipboard() {
   const pred = calculatePassageProbability(p);
   const cbr = findSimilarHistoricalCases(p, state.cohort, 5);
   const sp = pred.surgicalPathway;
+  const j = pred.inputJustifications;
+
+  const tlcVal = (p.tlcCount || p.wbcCount || 8.0).toFixed(1);
+  const sCrVal = (p.serumCreatinine || 1.0).toFixed(2);
+  const isFemale = (p.sex || "M").toUpperCase() === "F";
+  const crNormalUpper = isFemale ? 1.00 : 1.20;
+  const crThreshold = isFemale ? 1.20 : 1.40;
+  const hasRenalImpairment = parseFloat(sCrVal) >= crThreshold;
 
   let aiProbText = `${pred.probabilityPercent}%`;
   let cohortText = `Among ${cbr.totalMatchesCount} most clinically proximate historical cases, ${cbr.historicalPassageRate}% passed spontaneously (avg ${cbr.avgDaysToPassage || "N/A"} days) and ${100 - cbr.historicalPassageRate}% required intervention.`;
@@ -1240,6 +1334,8 @@ function copyConsultationNoteToClipboard() {
   if (pred.isEmergency) {
     aiProbText = `0% [CONTRAINDICATED — EAU § 3.2.3: Active infection mandates emergency decompression; observation is strictly contraindicated]`;
     cohortText = `Among ${cbr.totalMatchesCount} matched emergency urosepsis cohort presentations, 100% required urgent upper urinary tract decompression (Double-J stent / PCN); 0% managed conservatively on MET.`;
+  } else if (hasRenalImpairment) {
+    aiProbText = `${pred.probabilityPercent}% [OVERRIDE — EAU § 3.4.1: Renal filtration is compromised (sCr ${sCrVal} mg/dL). MET observation trial is contraindicated; prompt decompression or expedient removal mandated]`;
   }
 
   const note = `================================================================================
@@ -1259,7 +1355,9 @@ Registry Calibration: 500-Patient Historical Cohort Registry (100% PubMed Trial 
 - Hydronephrosis: ${p.hydronephrosis}
 - Colic Duration: ${p.durationDays} days (VAS Pain: ${p.painVas}/10)
 - Infection/SIRS: ${p.fever ? "POSITIVE (Fever / Systemic Signs - HIGH RISK OBSTRUCTIVE SEPSIS)" : "Negative / Afebrile"}
-- Medical Expulsive Therapy (MET): ${pred.isEmergency ? "CONTRAINDICATED (Active Sepsis Mandates Drainage)" : (p.metPrescribed ? "Prescribed" : "Not Prescribed")}
+- Medical Expulsive Therapy (MET): ${pred.isEmergency ? "CONTRAINDICATED (Active Sepsis Mandates Drainage)" : hasRenalImpairment ? "CONTRAINDICATED (EAU § 3.4.1 restricts MET to preserved normal renal function)" : (p.metPrescribed ? "Prescribed" : "Not Prescribed")}
+- Serum Creatinine: ${sCrVal} mg/dL ${hasRenalImpairment ? `[ELEVATED — Post-Renal AKI (threshold: ${crThreshold.toFixed(1)} mg/dL); Renal function COMPROMISED]` : "[NORMAL — Preserved renal function]"}
+- Total Leukocyte Count (TLC): ${tlcVal} × 10³/μL${parseFloat(tlcVal) >= 14 ? " [LEUKOCYTOSIS — Sepsis criterion]" : ""}
 
 2. AI CLINICAL PREDICTION & COMPARATIVE COHORT:
 - Predicted Spontaneous Passage Likelihood: ${aiProbText}
@@ -1276,13 +1374,32 @@ Registry Calibration: 500-Patient Historical Cohort Registry (100% PubMed Trial 
   * Percutaneous Nephrostomy (PCN): Preferred in severe septic shock with hemodynamic instability (rapid bedside local anesthesia without GA/lithotomy), impassable impacted stone, or gross viscous pyonephrosis (8–10Fr lumen drains thick pus effectively).
 - Definitive Clearance Modality Selection:
   ${sp ? `${sp.colDefinitiveBadge} — ${sp.colDefinitiveTitle}` : "URS / ESWL"}
-  * EAU Directive: ${sp && sp.canDoDefinitiveFromStart ? "Primary single-stage definitive removal proceeds directly from the start (routine pre-stenting NOT indicated, LoE 1b)." : "Definitive stone removal STRICTLY DEFERRED until patient is afebrile >= 48–72h, TLC/inflammatory markers normalize, and urine is sterile. Primary URS/ESWL in active sepsis is strictly contraindicated due to pyelovenous bacteremia and septic shock risk (LoE 1b)."}
+  * EAU Directive: ${sp ? (sp.strategyType === 'urgent_renal_relief' ? "Expedient primary URS/FURS with stenting or staged DJ stenting is mandatory. ESWL is disfavored due to risk of steinstraße prolonging AKI." : sp.canDoDefinitiveFromStart ? "Primary single-stage definitive removal proceeds directly from the start when renal function is preserved (routine pre-stenting NOT indicated, LoE 1b)." : "Definitive stone removal STRICTLY DEFERRED until patient is afebrile >= 48–72h, TLC/inflammatory markers normalize, and urine is sterile.") : "See protocol"}
 
 4. RECOMMENDATION & MANAGEMENT PLAN:
 - Recommendation: ${pred.actionTitle}
 - Timeline: ${pred.timePassageSummary}
 - Actions:
 ${pred.clinicalActionPlan.map((step, idx) => `  ${idx + 1}. ${step}`).join("\n")}
+
+5. EAU MULTI-PARAMETRIC INPUT CORRELATION & TREATMENT RATIONALE:
+${j ? `
+- [Renal Filtration]: ${j.renal.statusTag}
+  Rationale: ${j.renal.rationaleHtml.replace(/<[^>]+>/g, '')}
+- [Infection / SIRS]: ${j.infection.statusTag}
+  Rationale: ${j.infection.rationaleHtml.replace(/<[^>]+>/g, '')}
+- [Calculus Dimensions]: ${j.stone.statusTag}
+  Rationale: ${j.stone.rationaleHtml.replace(/<[^>]+>/g, '')}
+- [CT Attenuation / Hardness]: ${j.density.statusTag}
+  Rationale: ${j.density.rationaleHtml.replace(/<[^>]+>/g, '')}
+- [Hydronephrosis Grade]: ${j.hydronephrosis ? j.hydronephrosis.statusTag + "\n  Rationale: " + j.hydronephrosis.rationaleHtml.replace(/<[^>]+>/g, '') : "N/A"}
+- [Symptoms & Colic Duration]: ${j.symptoms ? j.symptoms.statusTag + "\n  Rationale: " + j.symptoms.rationaleHtml.replace(/<[^>]+>/g, '') : "N/A"}
+- [Pharmacotherapy (MET & Analgesia)]: ${j.medication ? j.medication.statusTag + "\n  Rationale: " + j.medication.rationaleHtml.replace(/<[^>]+>/g, '') : "N/A"}
+- [Surgical Staging & Drainage]: ${j.staging.statusTag}
+  Rationale: ${j.staging.rationaleHtml.replace(/<[^>]+>/g, '')}
+- [Treatment Choice Justification]:
+  ${j.treatmentChoiceSummary ? j.treatmentChoiceSummary.rationaleHtml.replace(/<[^>]+>/g, '') : "N/A"}
+` : "N/A"}
 `;
 
   navigator.clipboard.writeText(note).then(() => {
