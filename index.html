@@ -278,7 +278,15 @@
           <div class="form-group">
             <div class="form-label">
               <span>Maximum Calculus Caliber</span>
-              <span class="label-val" id="lblStoneSize">4.5 mm</span>
+              <div class="typeable-caliber-wrapper" title="Click or tap to type exact calculus caliber in mm (e.g. 5.2)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="typeable-caliber-icon" aria-hidden="true">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                <input type="number" id="inputStoneSizeText" class="typeable-caliber-input" min="0.5" max="30.0" step="0.1" value="4.5" placeholder="4.5" aria-label="Stone size in millimeters">
+                <span class="caliber-unit-tag">mm</span>
+                <span class="label-val" id="lblStoneSize" style="display: none;">4.5 mm</span>
+              </div>
             </div>
             <div class="slider-container">
               <input type="range" id="inputStoneSize" class="range-slider" min="1.0" max="15.0" step="0.1" value="4.5">
@@ -310,7 +318,15 @@
           <div class="form-group">
             <div class="form-label">
               <span>CT Attenuation Density (HU)</span>
-              <span class="label-val" id="lblHuValue">750 HU</span>
+              <div class="typeable-caliber-wrapper" title="Click or tap to type exact CT HU density (e.g. 750)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="typeable-caliber-icon" aria-hidden="true">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                <input type="number" id="inputHuValueText" class="typeable-caliber-input" min="100" max="2000" step="10" value="750" placeholder="750" aria-label="CT density in HU">
+                <span class="caliber-unit-tag">HU</span>
+                <span class="label-val" id="lblHuValue" style="display: none;">750 HU</span>
+              </div>
             </div>
             <div class="slider-container">
               <input type="range" id="inputHuValue" class="range-slider" min="150" max="1600" step="10" value="750">

@@ -447,6 +447,71 @@ body {
   color: var(--color-primary-light);
 }
 
+/* Typeable Stone Size & Density Inputs */
+.typeable-caliber-wrapper {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.18rem 0.5rem;
+  gap: 5px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+  cursor: text;
+}
+
+.typeable-caliber-wrapper:hover {
+  border-color: var(--border-active);
+  background: var(--bg-card-hover);
+}
+
+.typeable-caliber-wrapper:focus-within {
+  border-color: var(--color-primary-light);
+  background: var(--bg-input);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.28), inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.typeable-caliber-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.typeable-caliber-wrapper:focus-within .typeable-caliber-icon {
+  color: var(--color-primary-light);
+}
+
+.typeable-caliber-input {
+  width: 56px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--color-primary-light);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: right;
+  padding: 0;
+  margin: 0;
+  -moz-appearance: textfield;
+}
+
+.typeable-caliber-input::-webkit-outer-spin-button,
+.typeable-caliber-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.caliber-unit-tag {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+
 /* Range Sliders */
 .slider-container {
   padding: 0.2rem 0;

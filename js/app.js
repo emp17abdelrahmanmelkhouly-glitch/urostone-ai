@@ -47,6 +47,7 @@ const elements = {
 
   // Intake Inputs
   inputStoneSize: document.getElementById("inputStoneSize"),
+  inputStoneSizeText: document.getElementById("inputStoneSizeText"),
   lblStoneSize: document.getElementById("lblStoneSize"),
   lblSizeCaliberText: document.getElementById("lblSizeCaliberText"),
   lblSizeGuideline: document.getElementById("lblSizeGuideline"),
@@ -60,6 +61,7 @@ const elements = {
   lblLocation: document.getElementById("lblLocation"),
 
   inputHuValue: document.getElementById("inputHuValue"),
+  inputHuValueText: document.getElementById("inputHuValueText"),
   lblHuValue: document.getElementById("lblHuValue"),
   huMarkerIndicator: document.getElementById("huMarkerIndicator"),
   huDot: document.getElementById("huDot"),
@@ -189,11 +191,43 @@ function bindEvents() {
   elements.themeToggleBtn.addEventListener("click", toggleTheme);
   elements.btnQuickReportHeader.addEventListener("click", () => switchTab("tabReport"));
 
-  // Stone Size
+  // Stone Size (Slider & Typeable Text)
   elements.inputStoneSize.addEventListener("input", (e) => {
     state.currentPatient.stoneSizeMm = parseFloat(e.target.value);
+    if (elements.inputStoneSizeText && document.activeElement !== elements.inputStoneSizeText) {
+      elements.inputStoneSizeText.value = state.currentPatient.stoneSizeMm.toFixed(1);
+    }
     renderAll();
   });
+
+  if (elements.inputStoneSizeText) {
+    const handleStoneTextInput = (val) => {
+      const cleanVal = String(val).replace(",", ".");
+      const parsed = parseFloat(cleanVal);
+      if (!isNaN(parsed) && parsed > 0 && parsed <= 40) {
+        state.currentPatient.stoneSizeMm = parsed;
+        if (elements.inputStoneSize) {
+          elements.inputStoneSize.value = Math.min(15.0, Math.max(1.0, parsed));
+        }
+        renderAll();
+      }
+    };
+
+    elements.inputStoneSizeText.addEventListener("input", (e) => {
+      handleStoneTextInput(e.target.value);
+    });
+
+    elements.inputStoneSizeText.addEventListener("change", (e) => {
+      handleStoneTextInput(e.target.value);
+      if (elements.inputStoneSizeText) {
+        elements.inputStoneSizeText.value = state.currentPatient.stoneSizeMm.toFixed(1);
+      }
+    });
+
+    elements.inputStoneSizeText.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") elements.inputStoneSizeText.blur();
+    });
+  }
 
   const ANATOMY_COORDINATES = {
     puj: { x: 82, y: 60 },
@@ -592,7 +626,12 @@ function renderIntakeDisplays() {
   const p = state.currentPatient;
 
   // Stone Size
-  elements.lblStoneSize.textContent = `${p.stoneSizeMm.toFixed(1)} mm`;
+  if (elements.lblStoneSize) {
+    elements.lblStoneSize.textContent = `${p.stoneSizeMm.toFixed(1)} mm`;
+  }
+  if (elements.inputStoneSizeText && document.activeElement !== elements.inputStoneSizeText) {
+    elements.inputStoneSizeText.value = p.stoneSizeMm.toFixed(1);
+  }
   // Relative visual circle diameter (scale: 1mm = ~3.2px, max 48px)
   const circlePx = Math.min(44, Math.max(8, p.stoneSizeMm * 3.4));
   elements.visualStoneCircle.style.width = `${circlePx}px`;

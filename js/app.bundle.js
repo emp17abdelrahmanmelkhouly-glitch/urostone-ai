@@ -646,12 +646,14 @@
     // Intake inputs
     btnResetIntake: document.getElementById("btnResetIntake"),
     inputStoneSize: document.getElementById("inputStoneSize"),
+    inputStoneSizeText: document.getElementById("inputStoneSizeText"),
     lblStoneSize: document.getElementById("lblStoneSize"),
     lblSizeCaliberText: document.getElementById("lblSizeCaliberText"),
     lblSizeGuideline: document.getElementById("lblSizeGuideline"),
     visualStoneCircle: document.getElementById("visualStoneCircle"),
 
     inputHuValue: document.getElementById("inputHuValue"),
+    inputHuValueText: document.getElementById("inputHuValueText"),
     lblHuValue: document.getElementById("lblHuValue"),
     huMarkerIndicator: document.getElementById("huMarkerIndicator"),
     huDot: document.getElementById("huDot"),
@@ -845,16 +847,84 @@
       });
     });
 
-    // Inputs
+    // Inputs: Stone Caliber (Slider & Typeable Text)
     elements.inputStoneSize.addEventListener("input", (e) => {
       state.currentPatient.stoneSizeMm = parseFloat(e.target.value);
+      if (elements.inputStoneSizeText && document.activeElement !== elements.inputStoneSizeText) {
+        elements.inputStoneSizeText.value = state.currentPatient.stoneSizeMm.toFixed(1);
+      }
       renderAll();
     });
 
+    if (elements.inputStoneSizeText) {
+      const handleStoneTextInput = (val) => {
+        const cleanVal = String(val).replace(",", ".");
+        const parsed = parseFloat(cleanVal);
+        if (!isNaN(parsed) && parsed > 0 && parsed <= 40) {
+          state.currentPatient.stoneSizeMm = parsed;
+          if (elements.inputStoneSize) {
+            elements.inputStoneSize.value = Math.min(15.0, Math.max(1.0, parsed));
+          }
+          renderAll();
+        }
+      };
+
+      elements.inputStoneSizeText.addEventListener("input", (e) => {
+        handleStoneTextInput(e.target.value);
+      });
+
+      elements.inputStoneSizeText.addEventListener("change", (e) => {
+        handleStoneTextInput(e.target.value);
+        if (elements.inputStoneSizeText) {
+          elements.inputStoneSizeText.value = state.currentPatient.stoneSizeMm.toFixed(1);
+        }
+      });
+
+      elements.inputStoneSizeText.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          elements.inputStoneSizeText.blur();
+        }
+      });
+    }
+
+    // Inputs: CT Attenuation HU (Slider & Typeable Text)
     elements.inputHuValue.addEventListener("input", (e) => {
       state.currentPatient.huValue = parseInt(e.target.value, 10);
+      if (elements.inputHuValueText && document.activeElement !== elements.inputHuValueText) {
+        elements.inputHuValueText.value = state.currentPatient.huValue;
+      }
       renderAll();
     });
+
+    if (elements.inputHuValueText) {
+      const handleHuTextInput = (val) => {
+        const parsed = parseInt(val, 10);
+        if (!isNaN(parsed) && parsed >= 100 && parsed <= 2500) {
+          state.currentPatient.huValue = parsed;
+          if (elements.inputHuValue) {
+            elements.inputHuValue.value = Math.min(1600, Math.max(150, parsed));
+          }
+          renderAll();
+        }
+      };
+
+      elements.inputHuValueText.addEventListener("input", (e) => {
+        handleHuTextInput(e.target.value);
+      });
+
+      elements.inputHuValueText.addEventListener("change", (e) => {
+        handleHuTextInput(e.target.value);
+        if (elements.inputHuValueText) {
+          elements.inputHuValueText.value = state.currentPatient.huValue;
+        }
+      });
+
+      elements.inputHuValueText.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          elements.inputHuValueText.blur();
+        }
+      });
+    }
 
     elements.hydronephrosisSelector.querySelectorAll(".segment-btn").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -1459,7 +1529,15 @@
 
   function renderIntake() {
     const p = state.currentPatient;
-    elements.lblStoneSize.textContent = `${p.stoneSizeMm.toFixed(1)} mm`;
+    if (elements.lblStoneSize) {
+      elements.lblStoneSize.textContent = `${p.stoneSizeMm.toFixed(1)} mm`;
+    }
+    if (elements.inputStoneSizeText && document.activeElement !== elements.inputStoneSizeText) {
+      elements.inputStoneSizeText.value = p.stoneSizeMm.toFixed(1);
+    }
+    if (elements.inputHuValueText && document.activeElement !== elements.inputHuValueText) {
+      elements.inputHuValueText.value = p.huValue;
+    }
     const circlePx = Math.min(46, Math.max(8, p.stoneSizeMm * 3.4));
     elements.visualStoneCircle.style.width = `${circlePx}px`;
     elements.visualStoneCircle.style.height = `${circlePx}px`;

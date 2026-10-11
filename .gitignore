@@ -1,0 +1,9 @@
+# System and large binary files
+cloudflared.exe
+*.log
+.desktop-data/
+website-to-upload/
+UroStone_AI_Standalone.zip
+node_modules/
+.DS_Store
+Thumbs.db
