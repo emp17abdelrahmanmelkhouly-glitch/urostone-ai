@@ -77,10 +77,10 @@ export function calculatePassageProbability(patientData) {
   const sCr = typeof serumCreatinine === "number" ? serumCreatinine : (parseFloat(serumCreatinine) || 1.0);
   const isFemale = (sex || "M").toUpperCase() === "F";
   const crNormalUpper = isFemale ? 1.00 : 1.20;
-  const crImpairmentThreshold = isFemale ? 1.20 : 1.40;
-  const hasRenalImpairment = sCr >= crImpairmentThreshold;
+  const crImpairmentThreshold = isFemale ? 1.01 : 1.21;
+  const hasRenalImpairment = sCr > crNormalUpper;
   const hasSevereAzotemia = sCr >= 2.0;
-  const hasBorderlineCr = sCr > crNormalUpper && sCr < crImpairmentThreshold;
+  const hasBorderlineCr = false;
   const effectiveTlc = typeof tlcCount === "number" ? tlcCount : (typeof wbcCount === "number" ? wbcCount : 8.0);
   const isSepsisEmergency = fever || effectiveTlc >= 14.0;
   const isSolitaryKidneyObstructed = solitaryKidney && (hydronephrosis !== "none" || sCr > crNormalUpper);
@@ -240,7 +240,7 @@ export function calculatePassageProbability(patientData) {
       feature: `Elevated sCr (${sCr.toFixed(2)} mg/dL) — Post-Renal AKI`,
       impact: "CONTRAINDICATED",
       type: "negative",
-      detail: `EAU § 3.4.1: Renal filtration is compromised (sCr ${sCr.toFixed(2)} mg/dL ≥ ${crImpairmentThreshold.toFixed(1)} mg/dL; normal: ≤${crNormalUpper.toFixed(1)} mg/dL). Conservative MET observation is strictly contraindicated. Urgent Double-J stenting or decompression required.`
+      detail: `EAU § 3.4.1: Renal filtration is compromised (sCr ${sCr.toFixed(2)} mg/dL > ${crNormalUpper.toFixed(2)} mg/dL; normal: ≤${crNormalUpper.toFixed(2)} mg/dL). Conservative MET observation is strictly contraindicated. Urgent Double-J stenting or decompression required.`
     });
   } else if (hasBorderlineCr) {
     logOdds -= 0.50;
@@ -502,7 +502,11 @@ export function calculatePassageProbability(patientData) {
     featureImpacts,
     huAnalysis: classifyHounsfieldUnit(huValue),
     surgicalPathway,
-    inputJustifications
+    inputJustifications,
+    hasRenalImpairment,
+    hasSevereAzotemia,
+    isSepsisEmergency,
+    isRenalEmergency
   };
 }
 
@@ -531,10 +535,10 @@ export function determineSurgicalPathway(patientData, probabilityPercent, isEmer
   const sCr = typeof serumCreatinine === "number" ? serumCreatinine : (parseFloat(serumCreatinine) || 1.0);
   const isFemale = (sex || "M").toUpperCase() === "F";
   const crNormalUpper = isFemale ? 1.00 : 1.20;
-  const crImpairmentThreshold = isFemale ? 1.20 : 1.40;
-  const hasRenalImpairment = sCr >= crImpairmentThreshold;
+  const crImpairmentThreshold = isFemale ? 1.01 : 1.21;
+  const hasRenalImpairment = sCr > crNormalUpper;
   const hasSevereAzotemia = sCr >= 2.0;
-  const hasBorderlineCr = sCr > crNormalUpper && sCr < crImpairmentThreshold;
+  const hasBorderlineCr = false;
   const effectiveTlc = typeof tlcCount === "number" ? tlcCount : (typeof wbcCount === "number" ? wbcCount : 8.0);
   const isSepsis = fever || effectiveTlc >= 14.0;
   const isSolitaryKidneyObstructed = solitaryKidney && (patientData.hydronephrosis !== "none" || sCr > crNormalUpper);
@@ -853,10 +857,10 @@ export function generateTreatmentJustifications(patientData, probabilityPercent,
   const sCr = typeof serumCreatinine === "number" ? serumCreatinine : (parseFloat(serumCreatinine) || 1.0);
   const isFemale = (sex || "M").toUpperCase() === "F";
   const crNormalUpper = isFemale ? 1.00 : 1.20;
-  const crImpairmentThreshold = isFemale ? 1.20 : 1.40;
-  const hasRenalImpairment = sCr >= crImpairmentThreshold;
+  const crImpairmentThreshold = isFemale ? 1.01 : 1.21;
+  const hasRenalImpairment = sCr > crNormalUpper;
   const hasSevereAzotemia = sCr >= 2.0;
-  const hasBorderlineCr = sCr > crNormalUpper && sCr < crImpairmentThreshold;
+  const hasBorderlineCr = false;
   const effectiveTlc = typeof tlcCount === "number" ? tlcCount : (typeof wbcCount === "number" ? wbcCount : 8.0);
   const isSepsis = fever || effectiveTlc >= 14.0;
   const isSolitaryKidneyObstructed = solitaryKidney && (hydronephrosis !== "none" || sCr > crNormalUpper);

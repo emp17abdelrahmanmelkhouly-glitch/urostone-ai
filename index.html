@@ -13,7 +13,7 @@
   <meta name="theme-color" content="#0b1120">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/main.css?v=3.0">
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 </head>
@@ -628,7 +628,7 @@
               <div class="directive-card">
                 <span class="directive-label">EAU Acute Analgesia Protocol</span>
                 <span class="directive-val" id="eauPainText">NSAIDs First-Line (Diclofenac / Ketorolac)</span>
-                <span style="font-size: 0.72rem; color: var(--text-muted);">EAU LoE 1b: Superior pain control and less vomiting than opioids</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);" id="eauPainSubtext">EAU LoE 1b: Superior pain control and less vomiting than opioids in normal renal function</span>
               </div>
 
               <div class="directive-card">
@@ -1553,7 +1553,7 @@
   <!-- Application Logic Scripts -->
   <script src="js/qrcode.js"></script>
   <script src="js/sampleData.js"></script>
-  <script src="js/app.bundle.js"></script>
+  <script src="js/app.bundle.js?v=3.1"></script>
 
   <!-- PWA Service Worker Registration -->
   <script>

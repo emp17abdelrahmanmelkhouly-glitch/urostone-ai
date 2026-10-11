@@ -1,7 +1,7 @@
 // UroStone AI - Service Worker (Offline PWA Engine)
 // Calibrated with EAU Guidelines & 500-Patient Cohort (100% PubMed Verified)
 
-const CACHE_NAME = "urostone-ai-v2.8";
+const CACHE_NAME = "urostone-ai-v3.1-renal-emergency-fix";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
