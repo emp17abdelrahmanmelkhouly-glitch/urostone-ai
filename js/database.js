@@ -3,7 +3,7 @@
 
 import { INITIAL_PATIENT_COHORT } from "./sampleData.js";
 
-const DB_STORAGE_KEY = "urostone_patient_cohort_v8_eau_emergency_harmonized_500";
+const DB_STORAGE_KEY = "urostone_patient_cohort_v10_eau_renal_correlated_500";
 
 /**
  * Initialize or get patient cohort

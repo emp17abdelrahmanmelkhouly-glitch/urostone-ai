@@ -987,13 +987,20 @@ function renderCbrSection(cbr) {
     elements.cbrAvgDays.style.color = "var(--status-danger)";
     elements.cbrInterventionRate.textContent = `${100 - cbr.historicalPassageRate}%`;
     elements.cbrInterventionRate.style.color = "var(--status-danger)";
+  } else if (cbr.hasRenalImpairment) {
+    elements.cbrPassageRate.textContent = `${cbr.historicalPassageRate}%`;
+    elements.cbrPassageRate.style.color = cbr.historicalPassageRate === 0 ? "var(--status-danger)" : (cbr.historicalPassageRate < 50 ? "var(--color-warning)" : "var(--status-success)");
+    elements.cbrAvgDays.textContent = cbr.historicalPassageRate === 0 ? "Contraindicated" : (cbr.avgDaysToPassage !== null ? `${cbr.avgDaysToPassage} d` : "Expedient Relief");
+    elements.cbrAvgDays.style.color = "var(--status-danger)";
+    elements.cbrInterventionRate.textContent = `${100 - cbr.historicalPassageRate}%`;
+    elements.cbrInterventionRate.style.color = "var(--status-danger)";
   } else {
     elements.cbrPassageRate.textContent = `${cbr.historicalPassageRate}%`;
-    elements.cbrPassageRate.style.color = "var(--status-success)";
+    elements.cbrPassageRate.style.color = cbr.historicalPassageRate >= 50 ? "var(--status-success)" : "var(--color-warning)";
     elements.cbrAvgDays.textContent = cbr.avgDaysToPassage !== null ? `${cbr.avgDaysToPassage} d` : "N/A";
     elements.cbrAvgDays.style.color = "var(--accent-sky)";
     elements.cbrInterventionRate.textContent = `${100 - cbr.historicalPassageRate}%`;
-    elements.cbrInterventionRate.style.color = "var(--status-danger)";
+    elements.cbrInterventionRate.style.color = (100 - cbr.historicalPassageRate) >= 50 ? "var(--status-danger)" : "var(--color-warning)";
   }
 
   if (cbr.topMatches.length === 0) {
@@ -1002,10 +1009,28 @@ function renderCbrSection(cbr) {
   }
 
   let emergencyNoticeHtml = "";
-  if (cbr.isEmergencyStratum) {
+  if (cbr.isRenalEmergencyStratum) {
+    emergencyNoticeHtml = `
+      <div class="cbr-emergency-callout cbr-renal-callout">
+        <strong>⚠ CRITICAL RENAL STRATIFICATION (EAU § 3.2.3 & § 3.4.1):</strong> Acute Post-Renal Azotemia / AKI detected (<strong>sCr: ${(cbr.queryCreatinine || 1.0).toFixed(2)} mg/dL</strong>). The model has automatically stratified matching against <em>historical cases with acute obstructive renal impairment requiring urgent upper tract decompression (JJ Stent / PCN)</em>. Spontaneous passage trial with MET is strictly contraindicated in this cohort to prevent irreversible loss of nephron mass.
+      </div>
+    `;
+  } else if (cbr.isSepsisStratum) {
     emergencyNoticeHtml = `
       <div class="cbr-emergency-callout">
-        <strong>CRITICAL STRATIFICATION (EAU § 3.2.3):</strong> Active fever / SIRS criteria detected. The model has automatically stratified matching against <em>historical emergency urosepsis presentations</em> requiring urgent upper tract decompression (JJ Stent / PCN). Spontaneous trial with MET is strictly contraindicated in this cohort.
+        <strong>🚨 CRITICAL SEPSIS STRATIFICATION (EAU § 3.2.3):</strong> Active fever / SIRS criteria detected. The model has automatically stratified matching against <em>historical emergency urosepsis presentations</em> requiring urgent upper tract decompression (JJ Stent / PCN). Spontaneous trial with MET is strictly contraindicated in this cohort.
+      </div>
+    `;
+  } else if (cbr.isEmergencyStratum) {
+    emergencyNoticeHtml = `
+      <div class="cbr-emergency-callout">
+        <strong>⚠ CRITICAL CLINICAL STRATIFICATION (EAU § 3.2.3):</strong> Emergency decompression criteria met (obstructed solitary kidney / severe hydronephrosis). Matching against urgent historical decompression cohorts. Spontaneous trial contraindicated.
+      </div>
+    `;
+  } else if (cbr.hasRenalImpairment) {
+    emergencyNoticeHtml = `
+      <div class="cbr-warning-callout">
+        <strong>⚠ EAU RENAL IMPAIRMENT CORRELATION:</strong> Elevated serum creatinine (${(cbr.queryCreatinine || 1.0).toFixed(2)} mg/dL) indicates post-renal AKI. Historical matching prioritizes patients with renal compromise, demonstrating high intervention rates and stenting requirements. Spontaneous passage with MET is contraindicated.
       </div>
     `;
   }
@@ -1016,6 +1041,12 @@ function renderCbrSection(cbr) {
       const outcomeBadge = isPassed
         ? `<span class="outcome-pill outcome-passed">Passed (${pt.daysToPassage || "?"}d)</span>`
         : `<span class="outcome-pill outcome-intervention">Intervened (${(pt.interventionType || "URS").toUpperCase()})</span>`;
+
+      const sCrVal = typeof pt.serumCreatinine === "number" ? pt.serumCreatinine : (parseFloat(pt.serumCreatinine) || 1.0);
+      const isSevereCr = sCrVal >= 2.0;
+      const isElevCr = sCrVal > (pt.sex === "F" ? 1.00 : 1.20);
+      const crChipClass = isSevereCr ? "metric-chip-danger" : (isElevCr ? "metric-chip-warning" : "");
+      const crLabel = isSevereCr ? " (Azotemia)" : (isElevCr ? " (AKI)" : "");
 
       return `
         <div class="match-card">
@@ -1033,8 +1064,9 @@ function renderCbrSection(cbr) {
             <span class="metric-chip">${(pt.location || "").toUpperCase()}</span>
             <span class="metric-chip">${pt.huValue} HU</span>
             <span class="metric-chip">Hydro: ${pt.hydronephrosis}</span>
+            <span class="metric-chip ${crChipClass}">sCr: ${sCrVal.toFixed(2)} mg/dL${crLabel}</span>
             <span class="metric-chip">${pt.metPrescribed ? "MET: Yes" : "No MET"}</span>
-            ${pt.fever ? '<span class="metric-chip" style="color:var(--status-danger); border-color:rgba(239,68,68,0.4);">Fever/Sepsis</span>' : ''}
+            ${pt.fever ? '<span class="metric-chip metric-chip-danger">Fever/Sepsis</span>' : ''}
           </div>
 
           <div class="match-outcome-row">
@@ -1230,10 +1262,22 @@ function renderReportView() {
   elements.repInfection.textContent = p.fever ? "FEVER PRESENT / SIRS SUSPECTED (High Risk)" : "Afebrile, no signs of sepsis";
 
   // AI Analytics Text
+  const isFemale = (p.sex || "M").toUpperCase() === "F";
+  const crNormUpper = isFemale ? 1.00 : 1.20;
+  const sCrVal = typeof p.serumCreatinine === "number" ? p.serumCreatinine : (parseFloat(p.serumCreatinine) || 1.0);
   if (pred.isEmergency) {
     elements.repAiAnalysisText.innerHTML = `
-      <p><strong>Predicted Spontaneous Passage Likelihood:</strong> <span style="font-size: 1.1rem; font-weight: 700; color: var(--status-danger);">0% (CONTRAINDICATED)</span> (EAU § 3.2.3: Active infection mandates immediate upper tract decompression; conservative observation is strictly contraindicated)</p>
-      <p><strong>Case-Based Cohort Comparison (Emergency Stratum):</strong> Evaluated against <strong>${cbr.totalMatchesCount} emergency urosepsis cohort presentations</strong> from patient registry. In this matched septic subgroup, <strong>100% required emergency surgical decompression</strong> (urgent retrograde JJ stent or PCN), with <strong>0% managed conservatively on MET</strong>.</p>
+      <p><strong>Predicted Spontaneous Passage Likelihood:</strong> <span style="font-size: 1.1rem; font-weight: 700; color: var(--status-danger);">0% (CONTRAINDICATED)</span> (EAU § 3.2.3: Active infection or critical azotemia mandates immediate upper tract decompression; conservative observation is strictly contraindicated)</p>
+      <p><strong>Case-Based Cohort Comparison (Emergency Stratum):</strong> Evaluated against <strong>${cbr.totalMatchesCount} emergency cohort presentations</strong> from patient registry. In this matched critical subgroup, <strong>100% required emergency surgical decompression</strong> (urgent retrograde JJ stent or PCN), with <strong>0% managed conservatively on MET</strong>.</p>
+      <p style="margin-top: 0.5rem;"><strong>Primary Clinical Determinants:</strong></p>
+      <ul style="padding-left: 1.25rem; margin-top: 0.25rem;">
+        ${pred.featureImpacts.map(i => `<li><strong>${i.feature}:</strong> ${i.impact} impact (${i.detail})</li>`).join("")}
+      </ul>
+    `;
+  } else if (sCrVal > crNormUpper) {
+    elements.repAiAnalysisText.innerHTML = `
+      <p><strong>Predicted Spontaneous Passage Likelihood:</strong> <span style="font-size: 1.1rem; font-weight: 700; color: var(--color-warning);">${pred.probabilityPercent}%</span> (EAU § 3.4.1 Override: Renal impairment present — MET trial contraindicated)</p>
+      <p><strong>Case-Based Cohort Comparison (Post-Renal AKI Stratum):</strong> Evaluated against <strong>${cbr.totalMatchesCount} matched post-renal obstructive nephropathy presentations</strong> (sCr: <strong>${sCrVal.toFixed(2)} mg/dL</strong>). In this clinically compromised subgroup, <strong>${100 - cbr.historicalPassageRate}% required endourological intervention / decompression</strong> (${cbr.historicalPassageRate}% expulsion; conservative observation contraindicated under EAU § 3.4.1).</p>
       <p style="margin-top: 0.5rem;"><strong>Primary Clinical Determinants:</strong></p>
       <ul style="padding-left: 1.25rem; margin-top: 0.25rem;">
         ${pred.featureImpacts.map(i => `<li><strong>${i.feature}:</strong> ${i.impact} impact (${i.detail})</li>`).join("")}
